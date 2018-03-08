@@ -23,4 +23,6 @@ urlpatterns = [
     path('', views.hello),
     path('add/', views.add),
     path('add2/<int:a>/<int:b>/', views.add2),
+    path('api/', views.api),
+    path('api2/', views.api2),
 ]
