@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>add result</title>
+</head>
+<body>
+hello:{{ name }}
+<br/>
+<a href="/add2/4/5/">计算 4+5</a>
+
+
+<br/>
+教程列表：
+{% for i in list %}
+    {{ i }}
+{% endfor %}
+
+<br/>
+{% for item in list %}
+    {{ item }}{% if not forloop.last %},{% endif %}
+{% endfor %}
+
+
+<br/>
+站点：{{ info_dict.site }} 内容：{{ info_dict.content }}
+</body>
+</html>
