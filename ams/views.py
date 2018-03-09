@@ -12,6 +12,28 @@ def hello(request):
     return render(request, 'index.html', data)
 
 
+def add_api(request):
+    print('add_api..................')
+    data = {'name': '张三'}
+    return render(request, 'add_api.html', data)
+
+
+def send_request(request):
+    print('1111111111111111111111111111111111111')
+    protocol = request.POST['protocol']
+    method = request.POST['method']
+    uri = request.POST['uri']
+    name = request.POST['name']
+    headers = request.POST['headers']
+    params = request.POST['params']
+
+    print('protocol={} method={} uri={} name={} headers={} params={}'.format(protocol, method, uri, name, headers, params))
+
+
+    data = {'name222': '张三'}
+    return HttpResponse(data)
+
+
 def add(request):
     a = request.GET['a']
     b = request.GET['b']

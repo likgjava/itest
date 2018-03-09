@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="title" content="Bootstrap可视化布局系统">
+    <meta name="description"
+          content="Bootstrap可视化布局系统是一款可在线拖放排序、在线编辑的Bootstrap可视化编辑器，通过该工具你可以通过拖放的形式的实现在线编辑基于bootstrap的html模板，并可直接生成模板，生成的模板可以直接下载。">
+    <meta name="keywords" content="bootstrap在线编辑器,bootstrap在线设计,bootstrap可视化工具">
+
+    <!-- Le styles -->
+    <link href="/static/js/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/js/select2/css/select2.min.css" rel="stylesheet">
+
+     <!-- Custom styles for this template -->
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+
+    <!-- Fav and touch icons -->
+    <link rel="shortcut icon" href="http://www.runoob.com/favicon.ico">
+
+    <script type="text/javascript" src="/static/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/select2/js/select2.min.js"></script>
+
+</head>
+<body>
+
+<nav class="navbar navbar-inverse navbar-fixed-top">
+    <div class="container-fluid">
+        <div class="navbar-header">
+            <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar"
+                    aria-expanded="false" aria-controls="navbar">
+                <span class="sr-only">Toggle navigation</span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+                <span class="icon-bar"></span>
+            </button>
+            <a class="navbar-brand" href="#">测试一下</a>
+        </div>
+        <div id="navbar" class="navbar-collapse collapse">
+            <ul class="nav navbar-nav navbar-right">
+                <li><a href="#">Dashboard</a></li>
+                <li><a href="#">Settings</a></li>
+                <li><a href="#">Profile</a></li>
+                <li><a href="#">Help</a></li>
+            </ul>
+            <form class="navbar-form navbar-right">
+                <input type="text" class="form-control" placeholder="Search...">
+            </form>
+        </div>
+    </div>
+</nav>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            <ul class="nav nav-sidebar">
+                <li class="active"><a href="#">接口管理 <span class="sr-only">(current)</span></a></li>
+                <li><a href="#">Reports</a></li>
+                <li><a href="#">Analytics</a></li>
+                <li><a href="#">Export</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="">Nav item</a></li>
+                <li><a href="">Nav item again</a></li>
+                <li><a href="">One more nav</a></li>
+                <li><a href="">Another nav item</a></li>
+                <li><a href="">More navigation</a></li>
+            </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="">Nav item again</a></li>
+                <li><a href="">One more nav</a></li>
+                <li><a href="">Another nav item</a></li>
+            </ul>
+        </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+            <div class="container-fluid">
+                <div class="navbar-header">
+                    <button type="button" class="btn btn-default">&lt;接口列表</button>
+                </div>
+                <div class="nav navbar-nav navbar-right">
+                    <button type="button" class="btn btn-success" onclick="send_request()">发送</button>
+                    <button type="button" class="btn btn-success" onclick="add_api()">添加接口</button>
+                </div>
+            </div>
+
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="protocol" class="col-sm-2 control-label">请求协议：</label>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="protocol">
+                                    <option value="HTTP">HTTP</option>
+                                    <option value="HTTPS">HTTPS</option>
+                                </select>
+                            </div>
+                            <label for="method" class="col-sm-2 control-label">请求方式：</label>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="method">
+                                    <option value="POST">POST</option>
+                                    <option value="GET">GET</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="uri" class="col-sm-2 control-label">URI：</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="uri">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="name" class="col-sm-2 control-label">名称：</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name">
+                            </div>
+                        </div>
+                    </form>
+
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    请求头部
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table id="headerTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>标签</th>
+                                <th>内容</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <select name="header_label" class="form-control">
+                                        <option value="Accept">Accept</option>
+                                        <option value="Accept-Charset">Accept-Charset</option>
+                                        <option value="Accept-Encoding">Accept-Encoding</option>
+                                        <option value="Accept-Language">Accept-Language</option>
+                                        <option value="Accept-Ranges">Accept-Ranges</option>
+                                        <option value="Authorization">Authorization</option>
+                                        <option value="Cache-Control">Cache-Control</option>
+                                        <option value="Connection">Connection</option>
+                                        <option value="Cookie">Cookie</option>
+                                        <option value="Content-Length">Content-Length</option>
+                                        <option value="Content-Type">Content-Type</option>
+                                        <option value="Content-MD5">Content-MD5</option>
+                                        <option value="Date">Date</option>
+                                        <option value="Expect">Expect</option>
+                                        <option value="From">From</option>
+                                        <option value="Host">Host</option>
+                                        <option value="If-Match">If-Match</option>
+                                        <option value="If-Modified-Since">If-Modified-Since</option>
+                                        <option value="If-None-Match">If-None-Match</option>
+                                        <option value="If-Range">If-Range</option>
+                                        <option value="If-Unmodified-Since">If-Unmodified-Since</option>
+                                        <option value="Max-Forwards">Max-Forwards</option>
+                                        <option value="Origin">Origin</option>
+                                        <option value="Pragma">Pragma</option>
+                                        <option value="Proxy-Authorization">Proxy-Authorization</option>
+                                        <option value="Range">Range</option>
+                                        <option value="Referer">Referer</option>
+                                        <option value="TE">TE</option>
+                                        <option value="Upgrade">Upgrade</option>
+                                        <option value="User-Agent">User-Agent</option>
+                                        <option value="Via">Via</option>
+                                        <option value="Warning">Warning</option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="header_value" placeholder="头部内容">
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-sm">
+                                        <span class="glyphicon glyphicon-move"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-sm">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>consectetur</td>
+                                <td>adipiscing</td>
+                                <td>elit</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    请求参数
+                </div>
+                <div class="panel-body">
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success">表单[form-data]</button>
+                        <button type="button" class="btn btn-default">源数据[raw]</button>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table id="paramTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>参数值</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" name="param_name" placeholder="参数名">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="param_value" placeholder="参数值">
+                                </td>
+                                <td>
+                                    <button type="button" class="btn btn-default btn-sm">
+                                        <span class="glyphicon glyphicon-move"></span>
+                                    </button>
+                                    <button type="button" class="btn btn-default btn-sm">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>consectetur</td>
+                                <td>adipiscing</td>
+                                <td>elit</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    返回结果
+                </div>
+                <div class="panel-body">
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success">body</button>
+                        <button type="button" class="btn btn-default">header</button>
+                    </div>
+
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            1111
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    function add_api() {
+        window.location.href = '/add_api'
+    }
+
+    function send_request() {
+        var data = {};
+        data['protocol'] = $('#protocol').val();
+        data['method'] = $('#method').val();
+        data['name'] = $('#name').val();
+        data['uri'] = $('#uri').val();
+
+        var headers = {};
+        $('#headerTable').find('tbody tr').each(function(i,dom){
+            var label = $(dom).find('select[name="header_label"]').val();
+            var value = $(dom).find('input[name="header_value"]').val();
+            headers[label] = value;
+        });
+        data['headers'] = JSON.stringify(headers);
+
+        var params = {};
+        $('#paramTable').find('tbody tr').each(function(i,dom){
+            var name = $(dom).find('input[name="param_name"]').val();
+            var value = $(dom).find('input[name="param_value"]').val();
+            params[name] = value;
+        });
+        data['params'] = JSON.stringify(params);
+
+        $.post('/send_request/', data);
+    }
+
+
+    $(document).ready(function () {
+        $("#e1").select2({
+            placeholder: "头部标签",
+            allowClear: true,
+            tags: true
+        });
+    });
+</script>
+</body>
+</html>
