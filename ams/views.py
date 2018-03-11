@@ -1,3 +1,9 @@
+import html
+import json
+
+import requests
+
+import cgi
 from django.shortcuts import render
 from django.http import HttpResponse
 
@@ -19,22 +25,46 @@ def add_api(request):
 
 
 def send_request(request):
+
     print('1111111111111111111111111111111111111')
     protocol = request.POST['protocol']
     method = request.POST['method']
     uri = request.POST['uri']
     name = request.POST['name']
     headers = request.POST['headers']
-    params = request.POST['params']
+    params_str = request.POST['params']
 
-    print('protocol={} method={} uri={} name={} headers={} params={}'.format(protocol, method, uri, name, headers, params))
+    print('params 1111111111111111111111111===========', type(params_str))
+
+    print('protocol={} method={} uri={} name={} headers={} params={}'.format(protocol, method, uri, name, headers,
+                                                                             params_str))
+
+    params = json.loads(params_str)
+    print('params=====', type(params))
 
 
-    data = {'name222': '张三'}
-    return HttpResponse(data)
+    result = {}
+    url = protocol + '://' + uri
+    global r
+    if method == 'GET':
+        r = requests.get(url, params=params)
+    elif method == 'POST':
+        r = requests.get(url, params=params)
+
+    result['body'] = html.escape(r.content.decode())
+    headers = {}
+    for k, v in r.headers.items():
+        headers[k] = v
+    result['headers'] = headers
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
 
 
 def add(request):
+    print('add================{}'.format(request.GET))
+    # aa = request.GET['aa']
+    # print('aa======={}'.format(aa))
     a = request.GET['a']
     b = request.GET['b']
     c = int(a) + int(b)
