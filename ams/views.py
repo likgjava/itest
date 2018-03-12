@@ -65,8 +65,8 @@ def send_request(request):
 
     except Exception as e:
         result['httpCode'] = 500
-        print('error11111111111111111===', str(e))
-        print('error...................................................', traceback.format_exc())
+        result['body'] = str(e)
+        print('error.......................111111111111111111............', traceback.format_exc())
     finally:
         end_time = time.time()
         result['takeTime'] = int((end_time - start_time) * 1000)
