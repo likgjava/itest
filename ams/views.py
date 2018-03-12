@@ -2,10 +2,8 @@ import html
 import json
 
 import requests
-
-import cgi
-from django.shortcuts import render
 from django.http import HttpResponse
+from django.shortcuts import render
 
 
 # Create your views here.
@@ -25,7 +23,6 @@ def add_api(request):
 
 
 def send_request(request):
-
     print('1111111111111111111111111111111111111')
     protocol = request.POST['protocol']
     method = request.POST['method']
@@ -42,14 +39,13 @@ def send_request(request):
     params = json.loads(params_str)
     print('params=====', type(params))
 
-
     result = {}
     url = protocol + '://' + uri
     global r
     if method == 'GET':
         r = requests.get(url, params=params)
     elif method == 'POST':
-        r = requests.get(url, params=params)
+        r = requests.post(url, params=params)
 
     result['body'] = html.escape(r.content.decode())
     headers = {}

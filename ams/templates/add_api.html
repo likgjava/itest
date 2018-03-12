@@ -20,6 +20,7 @@
     <script type="text/javascript" src="/static/js/jquery/jquery.min.js"></script>
     <script type="text/javascript" src="/static/js/bootstrap/js/bootstrap.min.js"></script>
     <script type="text/javascript" src="/static/js/select2/js/select2.min.js"></script>
+    <script type="text/javascript" src="/static/js/suggest/bootstrap-suggest.min.js"></script>
     <style>
         .test-header-key{color: #9e9e9e;}
     </style>
@@ -143,57 +144,25 @@
                             <tbody>
                             <tr>
                                 <td>
-                                    <select name="header_label" class="form-control">
-                                        <option value="Accept">Accept</option>
-                                        <option value="Accept-Charset">Accept-Charset</option>
-                                        <option value="Accept-Encoding">Accept-Encoding</option>
-                                        <option value="Accept-Language">Accept-Language</option>
-                                        <option value="Accept-Ranges">Accept-Ranges</option>
-                                        <option value="Authorization">Authorization</option>
-                                        <option value="Cache-Control">Cache-Control</option>
-                                        <option value="Connection">Connection</option>
-                                        <option value="Cookie">Cookie</option>
-                                        <option value="Content-Length">Content-Length</option>
-                                        <option value="Content-Type">Content-Type</option>
-                                        <option value="Content-MD5">Content-MD5</option>
-                                        <option value="Date">Date</option>
-                                        <option value="Expect">Expect</option>
-                                        <option value="From">From</option>
-                                        <option value="Host">Host</option>
-                                        <option value="If-Match">If-Match</option>
-                                        <option value="If-Modified-Since">If-Modified-Since</option>
-                                        <option value="If-None-Match">If-None-Match</option>
-                                        <option value="If-Range">If-Range</option>
-                                        <option value="If-Unmodified-Since">If-Unmodified-Since</option>
-                                        <option value="Max-Forwards">Max-Forwards</option>
-                                        <option value="Origin">Origin</option>
-                                        <option value="Pragma">Pragma</option>
-                                        <option value="Proxy-Authorization">Proxy-Authorization</option>
-                                        <option value="Range">Range</option>
-                                        <option value="Referer">Referer</option>
-                                        <option value="TE">TE</option>
-                                        <option value="Upgrade">Upgrade</option>
-                                        <option value="User-Agent">User-Agent</option>
-                                        <option value="Via">Via</option>
-                                        <option value="Warning">Warning</option>
-                                    </select>
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
+                                        <div class="input-group-btn">
+                                            <button type="button" class="btn btn-default dropdown-toggle"
+                                                    data-toggle="dropdown">
+                                                <span class="caret"></span>
+                                            </button>
+                                            <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" name="header_value" placeholder="头部内容">
+                                    <input type="text" class="form-control" name="header_value" onkeyup="changeHeaderValue(this)" placeholder="头部内容">
                                 </td>
-                                <td>
-                                    <button type="button" class="btn btn-default btn-sm">
-                                        <span class="glyphicon glyphicon-move"></span>
-                                    </button>
-                                    <button type="button" class="btn btn-default btn-sm">
+                                <td style="display: none">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
                                         <span class="glyphicon glyphicon-trash"></span>
                                     </button>
                                 </td>
-                            </tr>
-                            <tr>
-                                <td>consectetur</td>
-                                <td>adipiscing</td>
-                                <td>elit</td>
                             </tr>
                             </tbody>
                         </table>
@@ -228,7 +197,7 @@
                                     <input type="text" class="form-control" name="param_name" placeholder="参数名">
                                 </td>
                                 <td>
-                                    <input type="text" class="form-control" name="param_value" onchange="changeParamValue(this)" placeholder="参数值">
+                                    <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)" placeholder="参数值">
                                 </td>
                                 <td style="display: none">
                                     <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
@@ -250,18 +219,18 @@
 
                     <div class="tabbable" id="tabs-515722">
                         <ul class="nav nav-tabs">
-                            <li>
+                            <li class="active">
                                 <a href="#panel-873523" data-toggle="tab">body</a>
                             </li>
-                            <li class="active">
+                            <li>
                                 <a href="#panel-932680" data-toggle="tab">header</a>
                             </li>
                         </ul>
                         <div class="tab-content">
-                            <div class="tab-pane" id="panel-873523">
+                            <div class="tab-pane active" id="panel-873523">
                                 <p id="response_body"></p>
                             </div>
-                            <div class="tab-pane active" id="panel-932680">
+                            <div class="tab-pane" id="panel-932680">
                                 <p id="response_header"></p>
                             </div>
                         </div>
@@ -276,14 +245,41 @@
     </div>
 </div>
 
-<table>
+
+<table style="display: none">
+    <tbody id="headerTrTemplate">
+    <tr>
+        <td>
+            <div class="input-group">
+                <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                </div>
+            </div>
+        </td>
+        <td>
+            <input type="text" class="form-control" name="header_value" onkeyup="changeHeaderValue(this)"
+                   placeholder="头部内容">
+        </td>
+        <td style="display: none">
+            <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                <span class="glyphicon glyphicon-trash"></span>
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<table style="display: none">
     <tbody id="paramTrTemplate">
     <tr>
         <td>
             <input type="text" class="form-control" name="param_name" placeholder="参数名">
         </td>
         <td>
-            <input type="text" class="form-control" name="param_value" onchange="changeParamValue(this)"
+            <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)"
                    placeholder="参数值">
         </td>
         <td style="display: none">
@@ -294,15 +290,23 @@
     </tr>
     </tbody>
 </table>
+
 <script type="text/javascript">
+    function changeHeaderValue(dom) {
+        var nextTr = $(dom).parent().parent().next();
+        if($(dom).val() != '' && nextTr.html() == null){
+            $(dom).parent().parent().find('td:last').show();
+            $(dom).parent().parent().parent().append($('#headerTrTemplate').html());
+
+            $(dom).parent().parent().parent().find('input[name=headerLabel]').bsSuggest(headerLabelData);
+        }
+    }
     function changeParamValue(dom) {
         var nextTr = $(dom).parent().parent().next();
-        if(nextTr.html() == null){
+        if($(dom).val() != '' && nextTr.html() == null){
             $(dom).parent().parent().find('td:last').show();
             $(dom).parent().parent().parent().append($('#paramTrTemplate').html());
-
         }
-
     }
 
     function add_api() {
@@ -322,7 +326,7 @@
 
         var headers = {};
         $('#headerTable').find('tbody tr').each(function(i,dom){
-            var label = $(dom).find('select[name="header_label"]').val();
+            var label = $(dom).find('input[name="headerLabel"]').val();
             var value = $(dom).find('input[name="header_value"]').val();
             headers[label] = value;
         });
@@ -350,13 +354,57 @@
         });
     }
 
+    var headerLabelData = {
+            indexId: 0,
+            indexKey: 0,
+            //showBtn: false,
+            allowNoKeyword: false,
+            inputWarnColor: null,
+            ignorecase: true,
+            data: {
+                'value': [
+                    {'v': 'Accept'},
+                    {'v': 'Accept-Charset'},
+                    {'v': 'Accept-Encoding'},
+                    {'v': 'Accept-Language'},
+                    {'v': 'Accept-Ranges'},
+                    {'v': 'Authorization'},
+                    {'v': 'Cache-Control'},
+                    {'v': 'Connection'},
+                    {'v': 'Cookie'},
+                    {'v': 'Content-Length'},
+                    {'v': 'Content-Type'},
+                    {'v': 'Content-MD5'},
+                    {'v': 'Date'},
+                    {'v': 'Expect'},
+                    {'v': 'From'},
+                    {'v': 'Host'},
+                    {'v': 'If-Match'},
+                    {'v': 'If-Modified-Since'},
+                    {'v': 'If-None-Match'},
+                    {'v': 'If-Range'},
+                    {'v': 'If-Unmodified-Since'},
+                    {'v': 'Max-Forwards'},
+                    {'v': 'Origin'},
+                    {'v': 'Pragma'},
+                    {'v': 'Proxy-Authorization'},
+                    {'v': 'Range'},
+                    {'v': 'Referer'},
+                    {'v': 'TE'},
+                    {'v': 'Upgrade'},
+                    {'v': 'User-Agent'},
+                    {'v': 'Via'},
+                    {'v': 'Warning'}
+                ]
+            }
+        };
+
 
     $(document).ready(function () {
-        $("#e1").select2({
-            placeholder: "头部标签",
-            allowClear: true,
-            tags: true
-        });
+
+        $('input[name=headerLabel]').bsSuggest(headerLabelData);
+
+
     });
 </script>
 </body>
