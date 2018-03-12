@@ -23,6 +23,28 @@
     <script type="text/javascript" src="/static/js/suggest/bootstrap-suggest.min.js"></script>
     <style>
         .test-header-key{color: #9e9e9e;}
+
+        .test-httpHeader-content {
+            height: 30px;
+            line-height: 30px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+            color: #fff;
+            margin: 10px 0;
+            text-indent: 10px;
+            font-size: 16px;
+        }
+        .test-httpHeader-content .time {
+            font-size: 12px;
+            color: #fff;
+            margin-right: 10px;
+        }
+        .back-result-content{
+            width: calc(100% - 2px);
+            margin-top: 10px;
+        }
+        .test-error{background-color: #d32f2f;}
+        .test-success{background-color: #4caf50;}
     </style>
 
 </head>
@@ -220,15 +242,21 @@
                     <div class="tabbable" id="tabs-515722">
                         <ul class="nav nav-tabs">
                             <li class="active">
-                                <a href="#panel-873523" data-toggle="tab">body</a>
+                                <a href="#panel-body" data-toggle="tab">body</a>
                             </li>
                             <li>
                                 <a href="#panel-932680" data-toggle="tab">header</a>
                             </li>
                         </ul>
                         <div class="tab-content">
-                            <div class="tab-pane active" id="panel-873523">
-                                <p id="response_body"></p>
+                            <div class="tab-pane active" id="panel-body">
+
+                                <div class="test-httpHeader-content test-error" style="display: none">
+                                    <span id="httpCode"></span>
+                                    <span id="takeTime" class="pull-right time">time：16ms</span>
+                                </div>
+
+                                <pre class="back-result-content" id="response_body"></pre>
                             </div>
                             <div class="tab-pane" id="panel-932680">
                                 <p id="response_header"></p>
@@ -246,6 +274,7 @@
 </div>
 
 
+<!--模板-->
 <table style="display: none">
     <tbody id="headerTrTemplate">
     <tr>
@@ -328,7 +357,9 @@
         $('#headerTable').find('tbody tr').each(function(i,dom){
             var label = $(dom).find('input[name="headerLabel"]').val();
             var value = $(dom).find('input[name="header_value"]').val();
-            headers[label] = value;
+            if (label != null && label !== ''){
+                headers[label] = value;
+            }
         });
         data['headers'] = JSON.stringify(headers);
 
@@ -341,7 +372,17 @@
         data['params'] = JSON.stringify(params);
 
         $.post('/send_request/', data, function (json) {
+            $('#httpCode').html(json.httpCode);
+            $('#takeTime').html('time：'+json.takeTime+'ms');
+            if (json.httpCode == 200) {
+                $('#httpCode').parent().removeClass('test-error').addClass('test-success');
+            }else{
+                $('#httpCode').parent().removeClass('test-success').addClass('test-error');
+            }
             $('#response_body').html(json.body);
+            $('#httpCode').parent().show();
+
+
 
             var html = '';
             for (var key in json.headers){

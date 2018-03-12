@@ -1,7 +1,9 @@
 import html
 import json
+import traceback
 
 import requests
+import time
 from django.http import HttpResponse
 from django.shortcuts import render
 
@@ -28,30 +30,46 @@ def send_request(request):
     method = request.POST['method']
     uri = request.POST['uri']
     name = request.POST['name']
-    headers = request.POST['headers']
+    headers_str = request.POST['headers']
     params_str = request.POST['params']
 
     print('params 1111111111111111111111111===========', type(params_str))
 
-    print('protocol={} method={} uri={} name={} headers={} params={}'.format(protocol, method, uri, name, headers,
+    print('protocol={} method={} uri={} name={} headers={} params={}'.format(protocol, method, uri, name, headers_str,
                                                                              params_str))
-
-    params = json.loads(params_str)
-    print('params=====', type(params))
-
-    result = {}
-    url = protocol + '://' + uri
     global r
-    if method == 'GET':
-        r = requests.get(url, params=params)
-    elif method == 'POST':
-        r = requests.post(url, params=params)
+    result = {}
+    start_time = time.time()
+    try:
+        headers = json.loads(headers_str)
+        params = json.loads(params_str)
+        print('headers=====', type(headers))
 
-    result['body'] = html.escape(r.content.decode())
-    headers = {}
-    for k, v in r.headers.items():
-        headers[k] = v
-    result['headers'] = headers
+        url = protocol + '://' + uri
+
+        if method == 'GET':
+            r = requests.get(url, params=params, headers=headers)
+        elif method == 'POST':
+            r = requests.post(url, params=params, headers=headers)
+
+        print('r=============', r)
+        print('status============', r.status_code)
+        result['httpCode'] = r.status_code
+
+        result['body'] = html.escape(r.content.decode())
+        result_headers = {}
+        for k, v in r.headers.items():
+            result_headers[k] = v
+        result['headers'] = result_headers
+
+
+    except Exception as e:
+        result['httpCode'] = 500
+        print('error11111111111111111===', str(e))
+        print('error...................................................', traceback.format_exc())
+    finally:
+        end_time = time.time()
+        result['takeTime'] = int((end_time - start_time) * 1000)
 
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
@@ -70,6 +88,12 @@ def add(request):
 def add2(request, a, b):
     c = a + b
     return HttpResponse(str(c))
+
+
+def p(request):
+    # print('p======================={}'.format(dir(request.POST)))
+    print('p====body=============={}'.format(request.body))
+    return HttpResponse('aaaa')
 
 
 def api(request):

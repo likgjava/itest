@@ -27,4 +27,5 @@ urlpatterns = [
     path('api2/', views.api2),
     path('add_api/', views.add_api),
     path('send_request/', views.send_request),
+    path('p/', views.p),
 ]
