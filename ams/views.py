@@ -32,27 +32,33 @@ def send_request(request):
     name = request.POST['name']
     headers_str = request.POST['headers']
     params_str = request.POST['params']
+    request_type = request.POST['requestType']
 
     print('params 1111111111111111111111111===========', type(params_str))
 
-    print('protocol={} method={} uri={} name={} headers={} params={}'.format(protocol, method, uri, name, headers_str,
-                                                                             params_str))
+    print('protocol={} method={} uri={} name={} headers={} params={} request_type={}'.format(protocol, method, uri, name,
+                                                                                           headers_str, params_str,
+                                                                                           request_type))
     global r
     result = {}
     start_time = time.time()
     try:
         headers = json.loads(headers_str)
-        params = json.loads(params_str)
+
         print('headers=====', type(headers))
 
         url = protocol + '://' + uri
 
         if method == 'GET':
+            params = json.loads(params_str)
             r = requests.get(url, params=params, headers=headers)
         elif method == 'POST':
-            r = requests.post(url, params=params, headers=headers)
+            if request_type == 'formData':
+                params = json.loads(params_str)
+                r = requests.post(url, params=params, headers=headers)
+            else:
+                r = requests.post(url, data=params_str, headers=headers)
 
-        print('r=============', r)
         print('status============', r.status_code)
         result['httpCode'] = r.status_code
 

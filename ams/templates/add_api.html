@@ -129,7 +129,7 @@
                             </div>
                             <label for="method" class="col-sm-2 control-label">请求方式：</label>
                             <div class="col-sm-2">
-                                <select class="form-control" id="method">
+                                <select class="form-control" id="method" onchange="changeMethod(this)">
                                     <option value="POST">POST</option>
                                     <option value="GET">GET</option>
                                 </select>
@@ -153,60 +153,53 @@
             </div>
 
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    请求头部
-                </div>
+                <div class="panel-heading">请求头部</div>
                 <div class="panel-body">
-                    <div class="table-responsive">
-                        <table id="headerTable" class="table table-striped">
-                            <thead>
-                            <tr>
-                                <th>标签</th>
-                                <th>内容</th>
-                                <th>操作</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr>
-                                <td>
-                                    <div class="input-group">
-                                        <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
-                                        <div class="input-group-btn">
-                                            <button type="button" class="btn btn-default dropdown-toggle"
-                                                    data-toggle="dropdown">
-                                                <span class="caret"></span>
-                                            </button>
-                                            <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
-                                        </div>
+                    <table id="headerTable" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>标签</th>
+                            <th>内容</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
                                     </div>
-                                </td>
-                                <td>
-                                    <input type="text" class="form-control" name="header_value" onkeyup="changeHeaderValue(this)" placeholder="头部内容">
-                                </td>
-                                <td style="display: none">
-                                    <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
-                                        <span class="glyphicon glyphicon-trash"></span>
-                                    </button>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="header_value"
+                                       onkeyup="changeHeaderValue(this)" placeholder="头部内容">
+                            </td>
+                            <td style="display: none">
+                                <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
 
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    请求参数
-                </div>
+                <div class="panel-heading">请求参数</div>
                 <div class="panel-body">
-
                     <div class="btn-group">
-                        <button type="button" class="btn btn-success">表单[form-data]</button>
-                        <button type="button" class="btn btn-default">源数据[raw]</button>
+                        <button type="button" class="btn btn-success" onclick="selectRequestParamTab(this, 'form')" id="formBut">表单[form-data]</button>
+                        <button type="button" class="btn btn-default" onclick="selectRequestParamTab(this, 'raw')" id="rawBut">源数据[raw]</button>
                     </div>
-
                     <div class="table-responsive">
                         <table id="paramTable" class="table table-striped">
                             <thead>
@@ -233,15 +226,16 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <div id="rawDiv" style="display: none; margin-top: 10px;">
+                        <textarea id="raw" class="form-control" rows="4" placeholder="源数据"></textarea>
+                    </div>
                 </div>
             </div>
 
             <div class="panel panel-default">
-                <div class="panel-heading">
-                    返回结果
-                </div>
+                <div class="panel-heading">返回结果</div>
                 <div class="panel-body">
-
                     <div class="tabbable" id="tabs-515722">
                         <ul class="nav nav-tabs">
                             <li class="active">
@@ -266,8 +260,6 @@
                             </div>
                         </div>
                     </div>
-
-
                 </div>
             </div>
 
@@ -324,6 +316,28 @@
 </table>
 
 <script type="text/javascript">
+    function changeMethod(dom) {
+        var rawBut = $('#rawBut');
+        if($(dom).val() === 'POST'){
+            rawBut.show();
+        }else{
+            rawBut.hide();
+            if(rawBut.hasClass('btn-success')){
+                rawBut.siblings().click();
+            }
+        }
+    }
+    function selectRequestParamTab(dom, type) {
+        $(dom).removeClass('btn-default').addClass('btn-success');
+        $(dom).siblings().removeClass('btn-success').addClass('btn-default');
+        if(type === 'form'){
+            $('#paramTable').parent().show();
+            $('#rawDiv').hide();
+        }else{
+            $('#paramTable').parent().hide();
+            $('#rawDiv').show();
+        }
+    }
     function changeHeaderValue(dom) {
         var nextTr = $(dom).parent().parent().next();
         if($(dom).val() != '' && nextTr.html() == null){
@@ -373,13 +387,20 @@
         });
         data['headers'] = JSON.stringify(headers);
 
-        var params = {};
-        $('#paramTable').find('tbody tr').each(function(i,dom){
-            var name = $(dom).find('input[name="param_name"]').val();
-            var value = $(dom).find('input[name="param_value"]').val();
-            params[name] = value;
-        });
-        data['params'] = JSON.stringify(params);
+        //请求参数
+        if($('#formBut').hasClass('btn-success')){
+            var params = {};
+            $('#paramTable').find('tbody tr').each(function(i,dom){
+                var name = $(dom).find('input[name="param_name"]').val();
+                var value = $(dom).find('input[name="param_value"]').val();
+                params[name] = value;
+            });
+            data['params'] = JSON.stringify(params);
+            data['requestType'] = 'formData';
+        }else{
+            data['params'] = $('#raw').val();
+            data['requestType'] = 'raw';
+        }
 
         $.post('/send_request/', data, function (json) {
             $('#httpCode').html(json.httpCode);
