@@ -2,10 +2,9 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
-    <meta name="title" content="Bootstrap可视化布局系统">
-    <meta name="description"
-          content="Bootstrap可视化布局系统是一款可在线拖放排序、在线编辑的Bootstrap可视化编辑器，通过该工具你可以通过拖放的形式的实现在线编辑基于bootstrap的html模板，并可直接生成模板，生成的模板可以直接下载。">
-    <meta name="keywords" content="bootstrap在线编辑器,bootstrap在线设计,bootstrap可视化工具">
+    <meta name="title" content="iTest接口管理系统">
+    <meta name="description" content="iTest接口管理系统">
+    <meta name="keywords" content="iTest接口管理系统">
 
     <!-- Le styles -->
     <link href="/static/js/bootstrap/css/bootstrap.min.css" rel="stylesheet">
@@ -26,7 +25,6 @@
     <script type="text/javascript" src="/static/js/formValidation/js/framework/bootstrap.js"></script>
     <style>
         .test-header-key{color: #9e9e9e;}
-
         .test-httpHeader-content {
             height: 30px;
             line-height: 30px;
@@ -110,10 +108,9 @@
                 </div>
                 <div class="nav navbar-nav navbar-right">
                     <button type="button" class="btn btn-success" onclick="send_request()">发送</button>
-                    <button type="button" class="btn btn-success" onclick="add_api()">添加接口</button>
+                    <button type="button" class="btn btn-success" onclick="save_api()">保存</button>
                 </div>
             </div>
-
 
             <div class="panel panel-default">
                 <div class="panel-body">
@@ -340,7 +337,7 @@
     }
     function changeHeaderValue(dom) {
         var nextTr = $(dom).parent().parent().next();
-        if($(dom).val() != '' && nextTr.html() == null){
+        if($(dom).val() !== '' && nextTr.html() == null){
             $(dom).parent().parent().find('td:last').show();
             $(dom).parent().parent().parent().append($('#headerTrTemplate').html());
 
@@ -349,7 +346,7 @@
     }
     function changeParamValue(dom) {
         var nextTr = $(dom).parent().parent().next();
-        if($(dom).val() != '' && nextTr.html() == null){
+        if($(dom).val() !== '' && nextTr.html() == null){
             $(dom).parent().parent().find('td:last').show();
             $(dom).parent().parent().parent().append($('#paramTrTemplate').html());
         }
@@ -393,7 +390,9 @@
             $('#paramTable').find('tbody tr').each(function(i,dom){
                 var name = $(dom).find('input[name="param_name"]').val();
                 var value = $(dom).find('input[name="param_value"]').val();
-                params[name] = value;
+                if (name != null && name !== ''){
+                    params[name] = value;
+                }
             });
             data['params'] = JSON.stringify(params);
             data['requestType'] = 'formData';
@@ -413,16 +412,61 @@
             $('#response_body').html(json.body);
             $('#httpCode').parent().show();
 
-
-
             var html = '';
             for (var key in json.headers){
                 html += '<span class="test-header-key">'+key + '</span>: ' + json.headers[key] + '<br/>';
             }
             $('#response_header').html(html);
+        });
+    }
 
+    function save_api() {
+        var $form = $("#defaultForm");
+        var bv = $form.data('formValidation');
+        bv.validate();
+        if(!bv.isValid()){
+            return false;
+        }
 
+        var data = {};
+        data['protocol'] = $('#protocol').val();
+        data['method'] = $('#method').val();
+        data['name'] = $('#name').val();
+        data['uri'] = $('#uri').val();
 
+        var headers = {};
+        $('#headerTable').find('tbody tr').each(function(i,dom){
+            var label = $(dom).find('input[name="headerLabel"]').val();
+            var value = $(dom).find('input[name="header_value"]').val();
+            if (label != null && label !== ''){
+                headers[label] = value;
+            }
+        });
+        data['headers'] = JSON.stringify(headers);
+
+        //请求参数
+        if($('#formBut').hasClass('btn-success')){
+            var params = {};
+            $('#paramTable').find('tbody tr').each(function(i,dom){
+                var name = $(dom).find('input[name="param_name"]').val();
+                var value = $(dom).find('input[name="param_value"]').val();
+                if (name != null && name !== ''){
+                    params[name] = value;
+                }
+            });
+            data['params'] = JSON.stringify(params);
+            data['requestType'] = 'formData';
+        }else{
+            data['params'] = $('#raw').val();
+            data['requestType'] = 'raw';
+        }
+
+        $.post('/save_api/', data, function (json) {
+            if(json.success){
+                alert('保存成功');
+            }else{
+                alert('保存失败');
+            }
         });
     }
 

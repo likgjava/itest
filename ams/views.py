@@ -4,11 +4,14 @@ import traceback
 
 import requests
 import time
+
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import render
 
-
 # Create your views here.
+from ams.models import Api, Api_header, Api_request_param
+
 
 def hello(request):
     list = ["HTML", "CSS", "jQuery", "Python", "Django"]
@@ -36,7 +39,8 @@ def send_request(request):
 
     print('params 1111111111111111111111111===========', type(params_str))
 
-    print('protocol={} method={} uri={} name={} headers={} params={} request_type={}'.format(protocol, method, uri, name,
+    print(
+        'protocol={} method={} uri={} name={} headers={} params={} request_type={}'.format(protocol, method, uri, name,
                                                                                            headers_str, params_str,
                                                                                            request_type))
     global r
@@ -76,6 +80,59 @@ def send_request(request):
     finally:
         end_time = time.time()
         result['takeTime'] = int((end_time - start_time) * 1000)
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def save_api2(request):
+    ams_api = Api(apiName='hello', apiURI='www.baidu.com')
+    ams_api.save()
+    return HttpResponse("<p>数据添加成功！</p>")
+
+
+@transaction.atomic()
+def save_api(request):
+    print('1111111111111111111111111111111111111')
+    protocol = request.POST['protocol']
+    method = request.POST['method']
+    uri = request.POST['uri']
+    name = request.POST['name']
+    headers_str = request.POST['headers']
+    params_str = request.POST['params']
+    request_type = request.POST['requestType']
+    print(
+        'protocol={} method={} uri={} name={} headers={} params={} request_type={}'.format(protocol, method, uri, name,
+                                                                                           headers_str, params_str,
+                                                                                           request_type))
+
+    result = {}
+    try:
+        api = Api(apiName=name, apiURI=uri, apiProtocol=protocol, apiMethod=method, apiRequestParamType=request_type)
+        if request_type == 'raw':
+            api.apiRequestRaw = params_str
+        api.save()
+        print('api.id====================', api.id)
+
+        headers = json.loads(headers_str)
+        for k, v in headers.items():
+            api_header = Api_header(headerName=k, headerValue=v, apiID=api.id)
+            api_header.save()
+
+        a = 1 / 0
+
+        if request_type == 'formData':
+            params = json.loads(params_str)
+            for k, v in params.items():
+                api_request_param = Api_request_param(paramName=k, paramValue=v, apiID=api.id)
+                api_request_param.save()
+
+        # transaction.commit()
+        result['success'] = True
+    except Exception as e:
+        transaction.rollback()
+        result['success'] = False
+        # traceback.print_exc()
 
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")

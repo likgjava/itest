@@ -28,4 +28,6 @@ urlpatterns = [
     path('add_api/', views.add_api),
     path('send_request/', views.send_request),
     path('p/', views.p),
+    path('save_api2/', views.save_api2),
+    path('save_api/', views.save_api),
 ]
