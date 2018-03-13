@@ -21,6 +21,11 @@ def hello(request):
     return render(request, 'index.html', data)
 
 
+def api_list(request):
+    print('api_list..................')
+    data = {'name': '张三'}
+    return render(request, 'api_list.html', data)
+
 def add_api(request):
     print('add_api..................')
     data = {'name': '张三'}

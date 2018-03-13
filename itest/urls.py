@@ -30,4 +30,5 @@ urlpatterns = [
     path('p/', views.p),
     path('save_api2/', views.save_api2),
     path('save_api/', views.save_api),
+    path('api_list/', views.api_list),
 ]
