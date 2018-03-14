@@ -31,4 +31,7 @@ urlpatterns = [
     path('save_api2/', views.save_api2),
     path('save_api/', views.save_api),
     path('api_list/', views.api_list),
+    path('del_api/', views.del_api),
+    path('api_detail/', views.api_detail),
+    path('api_test/', views.api_test),
 ]

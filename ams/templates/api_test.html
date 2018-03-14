@@ -46,11 +46,6 @@
         }
         .test-error{background-color: #d32f2f;}
         .test-success{background-color: #4caf50;}
-
-        .dropdown-menu .strong-li {
-            font-weight: 700;
-            color: #43a047;
-        }
     </style>
 
 </head>
@@ -98,77 +93,213 @@
                 <li><a href="">Another nav item</a></li>
                 <li><a href="">More navigation</a></li>
             </ul>
+            <ul class="nav nav-sidebar">
+                <li><a href="">Nav item again</a></li>
+                <li><a href="">One more nav</a></li>
+                <li><a href="">Another nav item</a></li>
+            </ul>
         </div>
 
         <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
 
-            <div class="container-fluid navbar-default" style="padding-left: 0; margin-bottom: 10px;">
-                <div class="navbar-header form-inline">
-                    <form action="/api_list/" method="post">
-                        <button type="button" class="btn btn-success" onclick="to_add_api()">+ 添加接口</button>
-                        <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="搜索接口">
-                        <button type="submit" class="btn btn-default">搜索</button>
-                    </form>
-                </div>
-
-                <div class="nav navbar-nav navbar-right">
-                    <div class="dropdown" style="display: inline-block">
-                        <button type="button" class="btn dropdown-toggle btn-default" id="dropdownMenu1" data-toggle="dropdown">排序方式
-                            <span class="caret"></span>
-                        </button>
-                        <ul class="dropdown-menu" role="menu" aria-labelledby="dropdownMenu1">
-                            <li role="presentation" >
-                                <a role="menuitem" class="strong-li" tabindex="-1" href="#">创建时间[升序]</a>
-                            </li>
-                            <li role="presentation">
-                                <a role="menuitem" tabindex="-1" href="#">更新时间[升序]</a>
-                            </li>
-                            <li role="presentation">
-                                <a role="menuitem" tabindex="-1" href="#">接口名称[升序]</a>
-                            </li>
-                        </ul>
+            <div class="container-fluid" style="padding-left: 0; margin-bottom: 10px;">
+                <div class="navbar-header">
+                    <button type="button" class="btn btn-default" onclick="to_api_list()">&lt;接口列表</button>
+                    &nbsp;&nbsp;
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default" onclick="to_api_detail({{ api.id }})">详情</button>
+                        <button type="button" class="btn btn-success">测试</button>
                     </div>
+                </div>
+                <div class="nav navbar-nav navbar-right">
                 </div>
             </div>
 
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form class="form-inline" role="form">
+                        <div class="form-group">
+                            <label class="sr-only" for="protocol">请求协议</label>
+                            <select class="form-control" id="protocol">
+                                <option value="HTTP" {% ifequal api.apiProtocol 'HTTP' %}selected="selected"{% endifequal %}>HTTP</option>
+                                <option value="HTTPS" {% ifequal api.apiProtocol 'HTTPS' %}selected="selected"{% endifequal %}>HTTPS</option>
+                            </select>
+                            :
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="uri">URI</label>
+                            <input type="text" class="form-control" id="uri" placeholder="请输入URI" style="width: 500px;" value="{{ api.apiURI }}">
+                        </div>
+                        <div class="form-group">
+                            <label class="sr-only" for="method">请求方式</label>
+                            <select class="form-control" id="method" onchange="changeMethod(this)">
+                                <option value="POST" {% ifequal api.apiMethod 'POST' %}selected="selected"{% endifequal %}>POST</option>
+                                <option value="GET" {% ifequal api.apiMethod 'GET' %}selected="selected"{% endifequal %}>GET</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">发送</button>
+                    </form>
+                </div>
+            </div>
 
-            <div class="table-responsive">
-                <table id="paramTable" class="table table-striped">
-                    <thead>
-                    <tr>
-                        <th>接口名称 [21]</th>
-                        <th>接口URI</th>
-                        <th>请求方式</th>
-                        <th>最近更新者</th>
-                        <th>更新日期</th>
-                        <th>操作</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {% for api in api_list %}
+            <div class="panel panel-default">
+                <div class="panel-heading">请求头部</div>
+                <div class="panel-body">
+                    <table id="headerTable" class="table table-striped">
+                        <thead>
                         <tr>
-                            <td>{{ api.apiName }}</td>
-                            <td>{{ api.apiURI }}</td>
-                            <td><span class="label label-success">{{ api.apiMethod }}</span></td>
-                            <td></td>
-                            <td>{{ api.updateTime|date:"Y-m-d H:i:s" }}</td>
+                            <th>标签</th>
+                            <th>内容</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+
+                        {% for header in header_list %}
+                        <tr>
                             <td>
-                                <button title="详情" type="button" class="btn btn-default btn-sm" onclick="show_detail({{ api.id }})">
-                                    <span class="glyphicon glyphicon-eye-open"></span>
-                                </button>
-                                <button title="修改" type="button" class="btn btn-default btn-sm" onclick="delParamTableTr({{ api.id }})">
-                                    <span class="glyphicon glyphicon-edit"></span>
-                                </button>
-                                <button title="删除" type="button" class="btn btn-default btn-sm" onclick="delApi(this, {{ api.id }})">
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="headerLabel" value="{{ header.headerName }}" placeholder="头部标签">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="header_value" value="{{ header.headerValue }}" onkeyup="changeHeaderValue(this)" placeholder="头部内容">
+                            </td>
+                            <td>
+                                <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
                                     <span class="glyphicon glyphicon-trash"></span>
                                 </button>
                             </td>
                         </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
+                        {% endfor %}
+
+                        <tr>
+                            <td>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="header_value"
+                                       onkeyup="changeHeaderValue(this)" placeholder="头部内容">
+                            </td>
+                            <td style="display: none">
+                                <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
+
+            <div class="panel panel-default">
+                <div class="panel-heading">请求参数</div>
+                <div class="panel-body">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" onclick="selectRequestParamTab(this, 'form')" id="formBut">表单[form-data]</button>
+                        <button type="button" class="btn btn-default" onclick="selectRequestParamTab(this, 'raw')" id="rawBut">源数据[raw]</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="paramTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>参数值</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" name="param_name" placeholder="参数名">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)" placeholder="参数值">
+                                </td>
+                                <td style="display: none">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="rawDiv" style="display: none; margin-top: 10px;">
+                        <textarea id="raw" class="form-control" rows="4" placeholder="源数据"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">返回示例</div>
+                <div class="panel-body">
+                    <div class="tabbable">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#panel-success" data-toggle="tab">成功结果</a>
+                            </li>
+                            <li>
+                                <a href="#panel-failure" data-toggle="tab">失败结果</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="panel-success">
+                                <textarea id="apiSuccessMock" class="form-control" rows="4" style="margin-top: 10px"></textarea>
+                            </div>
+                            <div class="tab-pane" id="panel-failure">
+                                <textarea id="apiFailureMock" class="form-control" rows="4" style="margin-top: 10px"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">返回结果</div>
+                <div class="panel-body">
+                    <div class="tabbable" id="tabs-515722">
+                        <ul class="nav nav-tabs">
+                            <li class="active">
+                                <a href="#panel-body" data-toggle="tab">body</a>
+                            </li>
+                            <li>
+                                <a href="#panel-932680" data-toggle="tab">header</a>
+                            </li>
+                        </ul>
+                        <div class="tab-content">
+                            <div class="tab-pane active" id="panel-body">
+
+                                <div class="test-httpHeader-content test-error" style="display: none">
+                                    <span id="httpCode"></span>
+                                    <span id="takeTime" class="pull-right time">time：16ms</span>
+                                </div>
+
+                                <pre class="back-result-content" id="response_body"></pre>
+                            </div>
+                            <div class="tab-pane" id="panel-932680">
+                                <p id="response_header"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
 
         </div>
@@ -223,18 +354,30 @@
 </table>
 
 <script type="text/javascript">
-    function delApi(dom, apiId) {
-        if (confirm('确定删除该API吗？')) {
-            $.post('/del_api/', {apiId: apiId}, function (json) {
-                $(dom).parent().parent().remove();
-            });
+    function to_api_list() {
+        window.location.href = '/api_list/'
+    }
+    function changeMethod(dom) {
+        var rawBut = $('#rawBut');
+        if($(dom).val() === 'POST'){
+            rawBut.show();
+        }else{
+            rawBut.hide();
+            if(rawBut.hasClass('btn-success')){
+                rawBut.siblings().click();
+            }
         }
     }
-    function to_add_api() {
-        window.location.href = '/add_api/';
-    }
-    function show_detail(apiId) {
-        window.location.href = '/api_detail/?apiId='+apiId;
+    function selectRequestParamTab(dom, type) {
+        $(dom).removeClass('btn-default').addClass('btn-success');
+        $(dom).siblings().removeClass('btn-success').addClass('btn-default');
+        if(type === 'form'){
+            $('#paramTable').parent().show();
+            $('#rawDiv').hide();
+        }else{
+            $('#paramTable').parent().hide();
+            $('#rawDiv').show();
+        }
     }
     function changeHeaderValue(dom) {
         var nextTr = $(dom).parent().parent().next();
@@ -361,6 +504,10 @@
             data['params'] = $('#raw').val();
             data['requestType'] = 'raw';
         }
+
+        //返回示例
+        data['apiSuccessMock'] = $('#apiSuccessMock').val();
+        data['apiFailureMock'] = $('#apiFailureMock').val();
 
         $.post('/save_api/', data, function (json) {
             if(json.success){

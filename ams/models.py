@@ -9,6 +9,10 @@ class Api(models.Model):
     apiMethod = models.CharField(max_length=10)
     apiRequestParamType = models.CharField(max_length=20)
     apiRequestRaw = models.TextField(max_length=2000)
+    apiSuccessMock = models.TextField()
+    apiFailureMock = models.TextField()
+    updateTime = models.DateTimeField()
+    createTime = models.DateTimeField(auto_now_add=False)
 
 
 class Api_header(models.Model):
