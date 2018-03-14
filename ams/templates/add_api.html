@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
@@ -107,7 +108,6 @@
                     <button type="button" class="btn btn-default" onclick="to_api_list()">&lt;接口列表</button>
                 </div>
                 <div class="nav navbar-nav navbar-right">
-                    <button type="button" class="btn btn-success" onclick="send_request()">发送</button>
                     <button type="button" class="btn btn-success" onclick="save_api()">保存</button>
                 </div>
             </div>
@@ -254,37 +254,6 @@
                 </div>
             </div>
 
-            <div class="panel panel-default">
-                <div class="panel-heading">返回结果</div>
-                <div class="panel-body">
-                    <div class="tabbable" id="tabs-515722">
-                        <ul class="nav nav-tabs">
-                            <li class="active">
-                                <a href="#panel-body" data-toggle="tab">body</a>
-                            </li>
-                            <li>
-                                <a href="#panel-932680" data-toggle="tab">header</a>
-                            </li>
-                        </ul>
-                        <div class="tab-content">
-                            <div class="tab-pane active" id="panel-body">
-
-                                <div class="test-httpHeader-content test-error" style="display: none">
-                                    <span id="httpCode"></span>
-                                    <span id="takeTime" class="pull-right time">time：16ms</span>
-                                </div>
-
-                                <pre class="back-result-content" id="response_body"></pre>
-                            </div>
-                            <div class="tab-pane" id="panel-932680">
-                                <p id="response_header"></p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-
         </div>
     </div>
 </div>
@@ -340,6 +309,9 @@
     function to_api_list() {
         window.location.href = '/api_list/'
     }
+    function to_api_detail(apiId) {
+        window.location.href = '/api_detail/?apiId='+apiId;
+    }
     function changeMethod(dom) {
         var rawBut = $('#rawBut');
         if($(dom).val() === 'POST'){
@@ -387,65 +359,6 @@
         $(dom).parent().parent().remove();
     }
 
-    function send_request() {
-        var $form = $("#defaultForm");
-        var bv = $form.data('formValidation');
-        bv.validate();
-        if(!bv.isValid()){
-            return false;
-        }
-
-        var data = {};
-        data['protocol'] = $('#protocol').val();
-        data['method'] = $('#method').val();
-        data['name'] = $('#name').val();
-        data['uri'] = $('#uri').val();
-
-        var headers = {};
-        $('#headerTable').find('tbody tr').each(function(i,dom){
-            var label = $(dom).find('input[name="headerLabel"]').val();
-            var value = $(dom).find('input[name="header_value"]').val();
-            if (label != null && label !== ''){
-                headers[label] = value;
-            }
-        });
-        data['headers'] = JSON.stringify(headers);
-
-        //请求参数
-        if($('#formBut').hasClass('btn-success')){
-            var params = {};
-            $('#paramTable').find('tbody tr').each(function(i,dom){
-                var name = $(dom).find('input[name="param_name"]').val();
-                var value = $(dom).find('input[name="param_value"]').val();
-                if (name != null && name !== ''){
-                    params[name] = value;
-                }
-            });
-            data['params'] = JSON.stringify(params);
-            data['requestType'] = 'formData';
-        }else{
-            data['params'] = $('#raw').val();
-            data['requestType'] = 'raw';
-        }
-
-        $.post('/send_request/', data, function (json) {
-            $('#httpCode').html(json.httpCode);
-            $('#takeTime').html('time：'+json.takeTime+'ms');
-            if (json.httpCode == 200) {
-                $('#httpCode').parent().removeClass('test-error').addClass('test-success');
-            }else{
-                $('#httpCode').parent().removeClass('test-success').addClass('test-error');
-            }
-            $('#response_body').html(json.body);
-            $('#httpCode').parent().show();
-
-            var html = '';
-            for (var key in json.headers){
-                html += '<span class="test-header-key">'+key + '</span>: ' + json.headers[key] + '<br/>';
-            }
-            $('#response_header').html(html);
-        });
-    }
 
     function save_api() {
         var $form = $("#defaultForm");
@@ -495,6 +408,7 @@
         $.post('/save_api/', data, function (json) {
             if(json.success){
                 alert('保存成功');
+                to_api_detail(json.id);
             }else{
                 alert('保存失败');
             }

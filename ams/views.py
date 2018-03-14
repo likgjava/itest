@@ -24,16 +24,16 @@ def hello(request):
 
 
 def api_list(request):
-    q = request.POST.get('q')
+    q = request.POST.get('q', '')
     print('api_list q={}'.format(q))
 
     query = Api.objects
-    if q is not None:
+    if q != '':
         query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
     api_list = query.order_by('-createTime')
     print('api_list======', api_list)
 
-    data = {'api_list': api_list, 'q': q}
+    data = {'api_list': api_list, 'total_count': len(api_list), 'q': q}
     return render(request, 'api_list.html', data)
 
 
@@ -86,6 +86,23 @@ def api_test(request):
     return render(request, 'api_test.html', data)
 
 
+def edit_api(request):
+    api_id = request.GET['apiId']
+    print('api_test api_id={}'.format(api_id))
+
+    data = {}
+    api = Api.objects.get(id=api_id)
+    data['api'] = api
+
+    header_list = Api_header.objects.filter(apiID=api_id)
+    data['header_list'] = header_list
+
+    request_param_list = Api_request_param.objects.filter(apiID=api_id)
+    data['request_param_list'] = request_param_list
+
+    return render(request, 'edit_api.html', data)
+
+
 def add_api(request):
     print('add_api..................')
     data = {'name': '张三'}
@@ -93,21 +110,14 @@ def add_api(request):
 
 
 def send_request(request):
-    print('1111111111111111111111111111111111111')
+    print('send_request request param={}'.format(request.POST))
     protocol = request.POST['protocol']
     method = request.POST['method']
     uri = request.POST['uri']
-    name = request.POST['name']
     headers_str = request.POST['headers']
     params_str = request.POST['params']
     request_type = request.POST['requestType']
 
-    print('params 1111111111111111111111111===========', type(params_str))
-
-    print(
-        'protocol={} method={} uri={} name={} headers={} params={} request_type={}'.format(protocol, method, uri, name,
-                                                                                           headers_str, params_str,
-                                                                                           request_type))
     global r
     result = {}
     start_time = time.time()
@@ -158,6 +168,7 @@ def save_api2(request):
 
 def save_api(request):
     print('save_api request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
     protocol = request.POST['protocol']
     method = request.POST['method']
     uri = request.POST['uri']
@@ -171,7 +182,7 @@ def save_api(request):
     result = {}
     try:
         with transaction.atomic():
-            api = Api(apiName=name, apiURI=uri, apiProtocol=protocol, apiMethod=method)
+            api = Api(id=id, apiName=name, apiURI=uri, apiProtocol=protocol, apiMethod=method)
             api.apiRequestParamType = request_type
             api.apiSuccessMock = apiSuccessMock
             api.apiFailureMock = apiFailureMock
@@ -179,7 +190,13 @@ def save_api(request):
             if request_type == 'raw':
                 api.apiRequestRaw = params_str
             api.save()
+            result['id'] = api.id
             print('api.id====================', api.id)
+
+            # 如果是修改操作，则先删除历史数据
+            if id is not None:
+                Api_header.objects.filter(apiID=id).delete()
+                Api_request_param.objects.filter(apiID=id).delete()
 
             headers = json.loads(headers_str)
             for k, v in headers.items():

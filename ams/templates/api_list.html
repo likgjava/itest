@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
@@ -136,7 +137,7 @@
                 <table id="paramTable" class="table table-striped">
                     <thead>
                     <tr>
-                        <th>接口名称 [21]</th>
+                        <th>接口名称 [{{ total_count }}]</th>
                         <th>接口URI</th>
                         <th>请求方式</th>
                         <th>最近更新者</th>
@@ -153,10 +154,10 @@
                             <td></td>
                             <td>{{ api.updateTime|date:"Y-m-d H:i:s" }}</td>
                             <td>
-                                <button title="详情" type="button" class="btn btn-default btn-sm" onclick="show_detail({{ api.id }})">
+                                <button title="详情" type="button" class="btn btn-default btn-sm" onclick="to_api_detail({{ api.id }})">
                                     <span class="glyphicon glyphicon-eye-open"></span>
                                 </button>
-                                <button title="修改" type="button" class="btn btn-default btn-sm" onclick="delParamTableTr({{ api.id }})">
+                                <button title="修改" type="button" class="btn btn-default btn-sm" onclick="to_edit_api({{ api.id }})">
                                     <span class="glyphicon glyphicon-edit"></span>
                                 </button>
                                 <button title="删除" type="button" class="btn btn-default btn-sm" onclick="delApi(this, {{ api.id }})">
@@ -168,9 +169,6 @@
                     </tbody>
                 </table>
             </div>
-
-
-
         </div>
     </div>
 </div>
@@ -233,8 +231,11 @@
     function to_add_api() {
         window.location.href = '/add_api/';
     }
-    function show_detail(apiId) {
+    function to_api_detail(apiId) {
         window.location.href = '/api_detail/?apiId='+apiId;
+    }
+    function to_edit_api(apiId) {
+        window.location.href = '/edit_api/?apiId='+apiId;
     }
     function changeHeaderValue(dom) {
         var nextTr = $(dom).parent().parent().next();

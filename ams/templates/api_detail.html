@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta charset="utf-8">
@@ -112,7 +113,7 @@
                         <button type="button" class="btn btn-default" onclick="to_api_test({{ api.id }})">测试</button>
                     </div>
                     &nbsp;&nbsp;
-                    <button type="button" class="btn btn-default" onclick="to_api_list()">修改</button>
+                    <button type="button" class="btn btn-default" onclick="to_edit_api({{ api.id }})">修改</button>
                 </div>
                 <div class="nav navbar-nav navbar-right">
                 </div>
@@ -231,6 +232,9 @@
     }
     function to_api_test(apiId) {
         window.location.href = '/api_test/?apiId='+apiId;
+    }
+    function to_edit_api(apiId) {
+        window.location.href = '/edit_api/?apiId='+apiId;
     }
     function changeMethod(dom) {
         var rawBut = $('#rawBut');
