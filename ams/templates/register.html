@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="">
+    <meta name="author" content="">
+
+    <title>用户注册-iTest</title>
+
+    <link href="/static/js/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/js/formValidation/css/formValidation.min.css" rel="stylesheet">
+    <!-- Custom styles for this template -->
+    <link href="/static/css/register.css" rel="stylesheet">
+
+    <script type="text/javascript" src="/static/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/formValidation.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/framework/bootstrap.js"></script>
+</head>
+<body>
+<div class="container">
+    <form class="form-signin" id="registerForm" role="form" method="post" action="/save_user/">
+        <h2 class="form-signin-heading">用户注册</h2>
+        <div class="form-group">
+            <label for="userName" class="sr-only">用户名</label>
+            <input type="text" id="userName" name="userName" class="form-control" placeholder="用户名" autofocus="autofocus"
+                onkeyup="check_user_name_exist(this)">
+        </div>
+        <div class="form-group">
+            <label for="userPassword" class="sr-only">密码</label>
+            <input type="password" id="userPassword" name="userPassword" class="form-control" placeholder="密码">
+        </div>
+        <div class="form-group">
+            <label for="userNickName" class="sr-only">昵称</label>
+            <input type="text" id="userNickName" name="userNickName" class="form-control" placeholder="昵称">
+        </div>
+        <div class="checkbox">
+            已有帐号？<a href="/">点击登录</a>
+        </div>
+        <button class="btn btn-lg btn-success btn-block" type="submit">注册</button>
+    </form>
+
+</div>
+<script type="text/javascript">
+    $(document).ready(function () {
+        $('#registerForm').formValidation({
+            err: {
+                container: 'tooltip'
+            },
+            trigger: 'blur',
+            icon: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                userName: {
+                    validators: {
+                        notEmpty: {
+                            message: '请填写此字段'
+                        },
+	                    stringLength: {
+	                        min: 3,
+	                        max: 30,
+	                        message: '用户名必须在3-30个字符之间'
+                        },
+                        remote: {
+                            type: 'POST',
+                            url: '/check_user_name_exist/',
+                            message: '该用户名已被占用'
+                            //delay: 1000
+                        }
+                    }
+                },
+                userPassword: {
+                    validators: {
+                        notEmpty: {
+	                        message: '密码不能为空'
+	                    },
+	                    different: {
+	                        field: 'userName',
+	                        message: '密码不能和用户名相同'
+	                    }
+                    }
+                }
+            }
+        }).on('success.form.fv', function(e) {
+            // Prevent form submission
+            e.preventDefault();
+
+            // Get the form instance
+            var $form = $(e.target);
+
+            // Get the FormValidation instance
+            var bv = $form.data('formValidation');
+
+            // Use Ajax to submit form data
+            $.post($form.attr('action'), $form.serialize(), function(result) {
+                console.log(result);
+                if(result.code === '0000'){
+                    alert('注册成功');
+                    window.location.href = '/login/'
+                }else{
+                    alert('注册失败');
+                }
+            }, 'json');
+        });
+    });
+</script>
+</body>
+</html>

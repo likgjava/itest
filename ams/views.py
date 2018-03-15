@@ -12,20 +12,86 @@ from django.http import HttpResponse
 from django.shortcuts import render
 
 # Create your views here.
-from ams.models import Api, Api_header, Api_request_param
+from ams.models import Api, Api_header, Api_request_param, User
 
 
-def hello(request):
+def to_login(request):
     list = ["HTML", "CSS", "jQuery", "Python", "Django"]
     info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
     data = {'name': '张三', 'list': list, 'info_dict': info_dict}
 
-    return render(request, 'index.html', data)
+    return render(request, 'login.html', data)
+
+
+def login(request):
+    userName = request.POST['userName']
+    userPassword = request.POST['userPassword']
+
+    data = {}
+    try:
+        user = User.objects.filter(userName=userName, userPassword=userPassword).first()
+        if user:
+            print('user==========', user)
+            d = {'id': user.id, 'userName': user.userName}
+            request.session['user'] = d
+            data['code'] = '0000'
+        else:
+            data['code'] = '1002'
+            data['msg'] = '登录失败，请检查用户名和密码是否正确！'
+
+    except Exception as e:
+        traceback.print_exc()
+        data['code'] = '1001'
+        data['msg'] = str(e)
+
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+def register(request):
+    list = ["HTML", "CSS", "jQuery", "Python", "Django"]
+    info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
+    data = {'name': '张三', 'list': list, 'info_dict': info_dict}
+    return render(request, 'register.html', data)
+
+
+def save_user(request):
+    userName = request.POST['userName']
+    userPassword = request.POST['userPassword']
+    userNickName = request.POST['userNickName']
+
+    data = {}
+    try:
+        user = User(userName=userName, userPassword=userPassword, userNickName=userNickName)
+        user.save()
+        data['code'] = '0000'
+    except Exception as e:
+        traceback.print_exc()
+        data['code'] = '1001'
+        data['msg'] = str(e)
+
+    return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+def check_user_name_exist(request):
+    userName = request.POST['userName']
+    print('check_user_name_exist param userName={}'.format(userName))
+
+    exists = User.objects.filter(userName=userName).exists()
+    print('exists=', exists)
+    data = {'valid': not exists}
+
+    return HttpResponse(json.dumps(data), content_type="application/json")
 
 
 def api_list(request):
     q = request.POST.get('q', '')
     print('api_list q={}'.format(q))
+
+    request.session['name'] = 'likg'
+    print('request.session.keys()====', request.session.keys())
+
+    user = request.session['user']
+    print('user type======', type(user))
 
     query = Api.objects
     if q != '':

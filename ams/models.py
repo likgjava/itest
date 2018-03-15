@@ -25,3 +25,9 @@ class Api_request_param(models.Model):
     paramName = models.CharField(max_length=255)
     paramValue = models.CharField(max_length=255)
     apiID = models.IntegerField()
+
+
+class User(models.Model):
+    userName = models.CharField(max_length=60)
+    userPassword = models.CharField(max_length=60)
+    userNickName = models.CharField(max_length=16)

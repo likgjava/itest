@@ -20,7 +20,12 @@ from ams import views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', views.hello),
+    path('', views.to_login),
+    path('to_login/', views.to_login),
+    path('login/', views.login),
+    path('register/', views.register),
+    path('check_user_name_exist/', views.check_user_name_exist),
+    path('save_user/', views.save_user),
     path('add/', views.add),
     path('add2/<int:a>/<int:b>/', views.add2),
     path('api/', views.api),
