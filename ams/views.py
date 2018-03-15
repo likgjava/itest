@@ -9,7 +9,7 @@ import time
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 
 # Create your views here.
 from ams.models import Api, Api_header, Api_request_param, User
@@ -45,6 +45,11 @@ def login(request):
         data['msg'] = str(e)
 
     return HttpResponse(json.dumps(data), content_type="application/json")
+
+
+def logout(request):
+    del request.session['user']
+    return redirect('/')
 
 
 def register(request):
@@ -312,7 +317,7 @@ def api(request):
     info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
     data = {'name': '张三', 'list': list, 'info_dict': info_dict}
 
-    return render(request, 'api.html', data)
+    return render(request, 'z_bak.html', data)
 
 
 def api2(request):
@@ -320,4 +325,4 @@ def api2(request):
     info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
     data = {'name': '张三', 'list': list, 'info_dict': info_dict}
 
-    return render(request, 'api2.html', data)
+    return render(request, 'z_bak2.html', data)
