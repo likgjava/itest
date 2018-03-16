@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="title" content="iTest接口管理系统">
+    <meta name="description" content="iTest接口管理系统">
+    <meta name="keywords" content="iTest接口管理系统">
+
+    <!-- Le styles -->
+    <link href="/static/js/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/js/select2/css/select2.min.css" rel="stylesheet">
+    <link href="/static/js/formValidation/css/formValidation.min.css" rel="stylesheet">
+
+     <!-- Custom styles for this template -->
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+
+    <!-- Fav and touch icons -->
+    <link rel="shortcut icon" href="http://www.runoob.com/favicon.ico">
+
+    <script type="text/javascript" src="/static/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/select2/js/select2.min.js"></script>
+    <script type="text/javascript" src="/static/js/suggest/bootstrap-suggest.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/formValidation.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/framework/bootstrap.js"></script>
+    <style>
+        .test-header-key{color: #9e9e9e;}
+        .test-httpHeader-content {
+            height: 30px;
+            line-height: 30px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+            color: #fff;
+            margin: 10px 0;
+            text-indent: 10px;
+            font-size: 16px;
+        }
+        .test-httpHeader-content .time {
+            font-size: 12px;
+            color: #fff;
+            margin-right: 10px;
+        }
+        .back-result-content{
+            width: calc(100% - 2px);
+            margin-top: 10px;
+        }
+        .test-error{background-color: #d32f2f;}
+        .test-success{background-color: #4caf50;}
+
+        .dropdown-menu .strong-li {
+            font-weight: 700;
+            color: #43a047;
+        }
+    </style>
+
+</head>
+<body>
+{% include 'header.html' %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            {% include 'sidebar.html' %}
+        </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+            <div class="container-fluid navbar-default" style="padding-left: 0; margin-bottom: 10px;">
+                <div class="navbar-header form-inline">
+                    <form action="">
+                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">+ 新增项目</button>
+                    </form>
+                </div>
+
+                <div class="nav navbar-nav navbar-right">
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table id="paramTable" class="table table-striped">
+                    <thead>
+                    <tr>
+                        <th>项目名称</th>
+                        <th>版本号</th>
+                        <th>最后修改时间</th>
+                        <th>操作</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for project in project_list %}
+                        <tr>
+                            <td>{{ project.projectName }}</td>
+                            <td>{{ project.projectVersion }}</td>
+                            <td>{{ project.projectUpdateTime|date:"Y-m-d H:i:s" }}</td>
+                            <td>
+                                <button title="修改" type="button" class="btn btn-default btn-sm" onclick="to_edit_api({{ api.id }})">
+                                    <span class="glyphicon glyphicon-edit"></span>
+                                </button>
+                                <button title="删除" type="button" class="btn btn-default btn-sm" onclick="delApi(this, {{ api.id }})">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">新增项目</h4>
+            </div>
+            <div class="modal-body">
+
+                <form class="form-horizontal" role="form" id="projectForm">
+                    <div class="form-group">
+                        <label for="projectName" class="col-sm-2 control-label">项目名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="projectName" placeholder="1~32位字符串" maxlength="32">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="projectVersion" class="col-sm-2 control-label">版本号</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="projectVersion" value="1.0">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="save_project()">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    function delApi(dom, apiId) {
+        if (confirm('确定删除该API吗？')) {
+            $.post('/del_api/', {apiId: apiId}, function (json) {
+                $(dom).parent().parent().remove();
+            });
+        }
+    }
+    function to_add_api() {
+        window.location.href = '/add_api/';
+    }
+    function to_api_detail(apiId) {
+        window.location.href = '/api_detail/?apiId='+apiId;
+    }
+    function to_edit_api(apiId) {
+        window.location.href = '/edit_api/?apiId='+apiId;
+    }
+    function changeHeaderValue(dom) {
+        var nextTr = $(dom).parent().parent().next();
+        if($(dom).val() !== '' && nextTr.html() == null){
+            $(dom).parent().parent().find('td:last').show();
+            $(dom).parent().parent().parent().append($('#headerTrTemplate').html());
+
+            $(dom).parent().parent().parent().find('input[name=headerLabel]').bsSuggest(headerLabelData);
+        }
+    }
+    function changeParamValue(dom) {
+        var nextTr = $(dom).parent().parent().next();
+        if($(dom).val() !== '' && nextTr.html() == null){
+            $(dom).parent().parent().find('td:last').show();
+            $(dom).parent().parent().parent().append($('#paramTrTemplate').html());
+        }
+    }
+
+    function add_api() {
+        window.location.href = '/add_api'
+    }
+
+    function delParamTableTr(dom) {
+        $(dom).parent().parent().remove();
+    }
+
+
+    function save_project() {
+        var $form = $("#projectForm");
+        var bv = $form.data('formValidation');
+        bv.validate();
+        if(!bv.isValid()){
+            return false;
+        }
+
+        var data = {};
+        data['projectName'] = $('#projectName').val();
+        data['projectVersion'] = $('#projectVersion').val();
+        $.post('/save_project/', data, function (json) {
+            if(json.code === '0000'){
+                alert('保存成功');
+            }else{
+                alert(json.msg);
+            }
+        });
+    }
+
+    $(document).ready(function () {
+        $('#myModal').on('show.bs.modal', function () {
+            $('#projectForm')[0].reset();
+        });
+
+        $('#projectForm').formValidation({
+            //err: {
+            //    container: 'tooltip'
+            //},
+            trigger: 'blur',
+            icon: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                projectName: {
+                    validators: {
+                        notEmpty: {
+                            message: '请填写项目名称'
+                        }
+                    }
+                }
+            }
+        });
+    });
+</script>
+</body>
+</html>

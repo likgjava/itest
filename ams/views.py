@@ -12,7 +12,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from ams.models import Api, Api_header, Api_request_param, User
+from ams.models import Api, Api_header, Api_request_param, User, Project
 
 
 def to_login(request):
@@ -81,6 +81,33 @@ def check_user_name_exist(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+# ####################################### project ##########################################################
+def project_list(request):
+    plist = Project.objects.all()
+    data = {'project_list': plist, 'total_count': len(plist)}
+    return render(request, 'project_list.html', data)
+
+
+def save_project(request):
+    print('save_project request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
+    projectName = request.POST['projectName']
+    projectVersion = request.POST['projectVersion']
+
+    result = {}
+    try:
+        project = Project(id=id, projectName=projectName, projectVersion=projectVersion)
+        project.save()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+# ####################################### api ##########################################################
 def api_list(request):
     q = request.POST.get('q', '')
     print('api_list q={}'.format(q))

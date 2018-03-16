@@ -8,6 +8,13 @@ class User(models.Model):
     userPassword = models.CharField(max_length=60)
     userNickName = models.CharField(max_length=16)
 
+
+class Project(models.Model):
+    projectName = models.CharField(max_length=255)
+    projectUpdateTime = models.DateTimeField()
+    projectVersion = models.CharField(max_length=6)
+
+
 class Api(models.Model):
     apiName = models.CharField(max_length=255)
     apiURI = models.CharField(max_length=255)
@@ -21,6 +28,7 @@ class Api(models.Model):
     # updateUserID = models.IntegerField()
     # updateUser = models.ForeignKey(User, on_delete=False, db_column='updateUserID')
     updateUser = models.ForeignKey(User, on_delete=False)
+    project = models.ForeignKey(Project, on_delete=False)
     createTime = models.DateTimeField(auto_now_add=False)
 
 
@@ -34,5 +42,3 @@ class Api_request_param(models.Model):
     paramName = models.CharField(max_length=255)
     paramValue = models.CharField(max_length=255)
     apiID = models.IntegerField()
-
-
