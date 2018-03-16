@@ -76,6 +76,14 @@
                     <form id="defaultForm" class="form-horizontal" role="form">
                         <input type="hidden" id="apiId" value="{{ api.id }}">
                         <div class="form-group">
+                            <label for="projectId" class="col-sm-2 control-label">所属项目：</label>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="projectId">
+                                    {% for project in project_list %}
+                                    <option value="{{ project.id }}" {% ifequal api.project_id project.id %}selected{% endifequal %}>{{ project.projectName }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                             <label for="protocol" class="col-sm-2 control-label">请求协议：</label>
                             <div class="col-sm-2">
                                 <select class="form-control" id="protocol">
@@ -370,6 +378,7 @@
 
         var data = {};
         data['id'] = $('#apiId').val();
+        data['projectId'] = $('#projectId').val();
         data['protocol'] = $('#protocol').val();
         data['method'] = $('#method').val();
         data['name'] = $('#name').val();

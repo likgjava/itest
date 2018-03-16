@@ -82,6 +82,7 @@
                 <div class="panel-body">
                     <div class="row clearfix">
                         <div class="col-md-10 column">
+                            <div style="font-weight: bold">{{ api.project.projectName }}&nbsp;</div>
                             <div>
                                 <span class="label label-success">{{ api.apiProtocol }}</span>
                                 {{ api.apiURI }}
@@ -92,6 +93,7 @@
                             </div>
                         </div>
                         <div class="col-md-2 column" style="text-align: right">
+                            <div>&nbsp;</div>
                             <div>&nbsp;{{ api.updateUser.userName }}</div>
                             <div>{{ api.updateTime|date:"Y-m-d H:i:s" }}</div>
                         </div>

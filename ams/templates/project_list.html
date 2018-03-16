@@ -68,7 +68,7 @@
             <div class="container-fluid navbar-default" style="padding-left: 0; margin-bottom: 10px;">
                 <div class="navbar-header form-inline">
                     <form action="">
-                        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#myModal">+ 新增项目</button>
+                        <button type="button" class="btn btn-success" data-toggle="modal" onclick="openModal()">+ 新增项目</button>
                     </form>
                 </div>
 
@@ -93,10 +93,11 @@
                             <td>{{ project.projectVersion }}</td>
                             <td>{{ project.projectUpdateTime|date:"Y-m-d H:i:s" }}</td>
                             <td>
-                                <button title="修改" type="button" class="btn btn-default btn-sm" onclick="to_edit_api({{ api.id }})">
+                                <button title="修改" type="button" class="btn btn-default btn-sm"
+                                        onclick="openModal({{ project.id }},'{{ project.projectName }}', '{{ project.projectVersion }}')">
                                     <span class="glyphicon glyphicon-edit"></span>
                                 </button>
-                                <button title="删除" type="button" class="btn btn-default btn-sm" onclick="delApi(this, {{ api.id }})">
+                                <button title="删除" type="button" class="btn btn-default btn-sm" onclick="delProject(this, {{ project.id }})">
                                     <span class="glyphicon glyphicon-trash"></span>
                                 </button>
                             </td>
@@ -121,6 +122,7 @@
             <div class="modal-body">
 
                 <form class="form-horizontal" role="form" id="projectForm">
+                    <input type="hidden" id="projectId" name="projectId">
                     <div class="form-group">
                         <label for="projectName" class="col-sm-2 control-label">项目名称</label>
                         <div class="col-sm-10">
@@ -145,47 +147,32 @@
 </div>
 
 <script type="text/javascript">
-    function delApi(dom, apiId) {
-        if (confirm('确定删除该API吗？')) {
-            $.post('/del_api/', {apiId: apiId}, function (json) {
-                $(dom).parent().parent().remove();
+    function delProject(dom, id) {
+        if (confirm('删除操作不可撤回，确定删除该项目吗？')) {
+            $.post('/del_project/', {id: id}, function (json) {
+                if(json.code === '0000'){
+                    alert('删除成功！');
+                    window.location.href = '/project_list/';
+                }else{
+                    alert('系统异常！')
+                }
             });
         }
     }
-    function to_add_api() {
-        window.location.href = '/add_api/';
-    }
-    function to_api_detail(apiId) {
-        window.location.href = '/api_detail/?apiId='+apiId;
-    }
-    function to_edit_api(apiId) {
-        window.location.href = '/edit_api/?apiId='+apiId;
-    }
-    function changeHeaderValue(dom) {
-        var nextTr = $(dom).parent().parent().next();
-        if($(dom).val() !== '' && nextTr.html() == null){
-            $(dom).parent().parent().find('td:last').show();
-            $(dom).parent().parent().parent().append($('#headerTrTemplate').html());
+    function openModal(id, name, version) {
+        $('#projectForm')[0].reset();
+        //修改
+        if(id){
+            $('#myModalLabel').html('修改项目');
+            $('#projectId').val(id);
+            $('#projectName').val(name);
+            $('#projectVersion').val(version);
 
-            $(dom).parent().parent().parent().find('input[name=headerLabel]').bsSuggest(headerLabelData);
+        }else{
+            $('#myModalLabel').html('新增项目');
         }
+        $('#myModal').modal('show');
     }
-    function changeParamValue(dom) {
-        var nextTr = $(dom).parent().parent().next();
-        if($(dom).val() !== '' && nextTr.html() == null){
-            $(dom).parent().parent().find('td:last').show();
-            $(dom).parent().parent().parent().append($('#paramTrTemplate').html());
-        }
-    }
-
-    function add_api() {
-        window.location.href = '/add_api'
-    }
-
-    function delParamTableTr(dom) {
-        $(dom).parent().parent().remove();
-    }
-
 
     function save_project() {
         var $form = $("#projectForm");
@@ -196,11 +183,16 @@
         }
 
         var data = {};
+        if($('#projectId').val() !== ''){
+            data['id'] = $('#projectId').val();
+        }
         data['projectName'] = $('#projectName').val();
         data['projectVersion'] = $('#projectVersion').val();
         $.post('/save_project/', data, function (json) {
             if(json.code === '0000'){
                 alert('保存成功');
+                $('#myModal').modal('hide');
+                window.location.href = '/project_list/';
             }else{
                 alert(json.msg);
             }
@@ -208,9 +200,7 @@
     }
 
     $(document).ready(function () {
-        $('#myModal').on('show.bs.modal', function () {
-            $('#projectForm')[0].reset();
-        });
+        activeMenu('/project_list');
 
         $('#projectForm').formValidation({
             //err: {

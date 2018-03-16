@@ -1,9 +1,19 @@
-<ul class="nav nav-sidebar">
-    <li class="active"><a href="/project_list/">项目管理</a></li>
-    <li><a href="/api_list/">接口管理</a></li>
+<ul class="nav nav-sidebar" id="nav-sidebar">
+    <li><a href="/project_list/">项目管理</a></li>
+    <li class="active"><a href="/api_list/">接口管理</a></li>
     <li><a href="#">b</a></li>
-    <li><a href="#">c</a></li>
 </ul>
 <ul class="nav nav-sidebar">
     <li><a href="">aaa</a></li>
 </ul>
+<script type="text/javascript">
+    function activeMenu(path) {
+        $('#nav-sidebar').parent().find('li a').each(function (i,dom) {
+            if($(dom).attr('href').indexOf(path) !== -1) {
+                $('#nav-sidebar').parent().find('li').removeClass('active');
+                $(dom).parent().addClass('active');
+                return false;
+            }
+        });
+    }
+</script>

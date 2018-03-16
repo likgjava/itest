@@ -107,27 +107,59 @@ def save_project(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+def del_project(request):
+    project_id = request.POST['id']
+    print('del_project project_id={}'.format(project_id))
+
+    result = {}
+    try:
+        with transaction.atomic():
+            Project.objects.filter(id=project_id).delete()
+            api_list = Api.objects.filter(project_id=project_id)
+            for api in api_list:
+                api_id = api.id
+                Api.objects.filter(id=api_id).delete()
+                Api_header.objects.filter(apiID=api_id).delete()
+                Api_request_param.objects.filter(apiID=api_id).delete()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        result['msg'] = str(e)
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+# ######################################################################################################
 # ####################################### api ##########################################################
 def api_list(request):
     q = request.POST.get('q', '')
-    print('api_list q={}'.format(q))
-
-    request.session['name'] = 'likg'
-    print('request.session.keys()====', request.session.keys())
+    project_id = request.POST.get('projectId', '')
+    print('api_list q={} projectId={}'.format(q, project_id))
 
     user = request.session['user']
     print('user type======', type(user))
 
+    data = {}
     query = Api.objects
     if q != '':
         query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
+    if project_id != '':
+        query = query.filter(project_id=project_id)
+        data['project_id'] = int(project_id)
     api_list = query.order_by('-createTime')
     print('api_list======', api_list)
 
     # updateUser = api_list[0].updateUser
     # print('updateUser===========', updateUser.userName)
 
-    data = {'api_list': api_list, 'total_count': len(api_list), 'q': q}
+    plist = Project.objects.all().values('id', 'projectName')
+
+    data['api_list'] = api_list
+    data['total_count'] = len(api_list)
+    data['q'] = q
+    data['project_list'] = plist
     return render(request, 'api_list.html', data)
 
 
@@ -194,13 +226,73 @@ def edit_api(request):
     request_param_list = Api_request_param.objects.filter(apiID=api_id)
     data['request_param_list'] = request_param_list
 
+    plist = Project.objects.all().values('id', 'projectName')
+    data['project_list'] = plist
+
     return render(request, 'edit_api.html', data)
 
 
 def add_api(request):
-    print('add_api..................')
-    data = {'name': '张三'}
+    plist = Project.objects.all().values('id', 'projectName')
+    data = {'project_list': plist}
     return render(request, 'add_api.html', data)
+
+
+def save_api(request):
+    print('save_api request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
+    projectId = request.POST.get('projectId', None)
+    protocol = request.POST['protocol']
+    method = request.POST['method']
+    uri = request.POST['uri']
+    name = request.POST['name']
+    headers_str = request.POST['headers']
+    params_str = request.POST['params']
+    request_type = request.POST['requestType']
+    apiSuccessMock = request.POST['apiSuccessMock']
+    apiFailureMock = request.POST['apiFailureMock']
+
+    result = {}
+    try:
+        with transaction.atomic():
+            api = Api(id=id, apiName=name, apiURI=uri, apiProtocol=protocol, apiMethod=method)
+            api.project_id = projectId
+            api.apiRequestParamType = request_type
+            api.apiSuccessMock = apiSuccessMock
+            api.apiFailureMock = apiFailureMock
+            api.createTime = datetime.datetime.now()
+            api.updateUser = User(id=request.session['user']['id'])
+            if request_type == 'raw':
+                api.apiRequestRaw = params_str
+            api.save()
+            result['id'] = api.id
+            print('api.id====================', api.id)
+
+            # 如果是修改操作，则先删除历史数据
+            if id is not None:
+                Api_header.objects.filter(apiID=id).delete()
+                Api_request_param.objects.filter(apiID=id).delete()
+
+            headers = json.loads(headers_str)
+            for k, v in headers.items():
+                api_header = Api_header(headerName=k, headerValue=v, apiID=api.id)
+                api_header.save()
+
+            # a = 1 / 0
+
+            if request_type == 'formData':
+                params = json.loads(params_str)
+                for k, v in params.items():
+                    api_request_param = Api_request_param(paramName=k, paramValue=v, apiID=api.id)
+                    api_request_param.save()
+
+        result['success'] = True
+    except Exception as e:
+        result['success'] = False
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
 
 
 def send_request(request):
@@ -249,61 +341,6 @@ def send_request(request):
     finally:
         end_time = time.time()
         result['takeTime'] = int((end_time - start_time) * 1000)
-
-    print('result={}'.format(result))
-    return HttpResponse(json.dumps(result), content_type="application/json")
-
-
-def save_api(request):
-    print('save_api request param={}'.format(request.POST))
-    id = request.POST.get('id', None)
-    protocol = request.POST['protocol']
-    method = request.POST['method']
-    uri = request.POST['uri']
-    name = request.POST['name']
-    headers_str = request.POST['headers']
-    params_str = request.POST['params']
-    request_type = request.POST['requestType']
-    apiSuccessMock = request.POST['apiSuccessMock']
-    apiFailureMock = request.POST['apiFailureMock']
-
-    result = {}
-    try:
-        with transaction.atomic():
-            api = Api(id=id, apiName=name, apiURI=uri, apiProtocol=protocol, apiMethod=method)
-            api.apiRequestParamType = request_type
-            api.apiSuccessMock = apiSuccessMock
-            api.apiFailureMock = apiFailureMock
-            api.createTime = datetime.datetime.now()
-            api.updateUser = User(id=request.session['user']['id'])
-            if request_type == 'raw':
-                api.apiRequestRaw = params_str
-            api.save()
-            result['id'] = api.id
-            print('api.id====================', api.id)
-
-            # 如果是修改操作，则先删除历史数据
-            if id is not None:
-                Api_header.objects.filter(apiID=id).delete()
-                Api_request_param.objects.filter(apiID=id).delete()
-
-            headers = json.loads(headers_str)
-            for k, v in headers.items():
-                api_header = Api_header(headerName=k, headerValue=v, apiID=api.id)
-                api_header.save()
-
-            # a = 1 / 0
-
-            if request_type == 'formData':
-                params = json.loads(params_str)
-                for k, v in params.items():
-                    api_request_param = Api_request_param(paramName=k, paramValue=v, apiID=api.id)
-                    api_request_param.save()
-
-        result['success'] = True
-    except Exception as e:
-        result['success'] = False
-        traceback.print_exc()
 
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
