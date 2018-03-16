@@ -2,6 +2,12 @@ from django.db import models
 
 
 # Create your models here.
+
+class User(models.Model):
+    userName = models.CharField(max_length=60)
+    userPassword = models.CharField(max_length=60)
+    userNickName = models.CharField(max_length=16)
+
 class Api(models.Model):
     apiName = models.CharField(max_length=255)
     apiURI = models.CharField(max_length=255)
@@ -12,6 +18,9 @@ class Api(models.Model):
     apiSuccessMock = models.TextField()
     apiFailureMock = models.TextField()
     updateTime = models.DateTimeField()
+    # updateUserID = models.IntegerField()
+    # updateUser = models.ForeignKey(User, on_delete=False, db_column='updateUserID')
+    updateUser = models.ForeignKey(User, on_delete=False)
     createTime = models.DateTimeField(auto_now_add=False)
 
 
@@ -27,7 +36,3 @@ class Api_request_param(models.Model):
     apiID = models.IntegerField()
 
 
-class User(models.Model):
-    userName = models.CharField(max_length=60)
-    userPassword = models.CharField(max_length=60)
-    userNickName = models.CharField(max_length=16)

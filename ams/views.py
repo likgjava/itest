@@ -16,11 +16,7 @@ from ams.models import Api, Api_header, Api_request_param, User
 
 
 def to_login(request):
-    list = ["HTML", "CSS", "jQuery", "Python", "Django"]
-    info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
-    data = {'name': '张三', 'list': list, 'info_dict': info_dict}
-
-    return render(request, 'login.html', data)
+    return render(request, 'login.html')
 
 
 def login(request):
@@ -52,14 +48,11 @@ def logout(request):
     return redirect('/')
 
 
+def to_register(request):
+    return render(request, 'register.html')
+
+
 def register(request):
-    list = ["HTML", "CSS", "jQuery", "Python", "Django"]
-    info_dict = {'site': u'自强学堂', 'content': u'各种IT技术教程'}
-    data = {'name': '张三', 'list': list, 'info_dict': info_dict}
-    return render(request, 'register.html', data)
-
-
-def save_user(request):
     userName = request.POST['userName']
     userPassword = request.POST['userPassword']
     userNickName = request.POST['userNickName']
@@ -103,6 +96,9 @@ def api_list(request):
         query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
     api_list = query.order_by('-createTime')
     print('api_list======', api_list)
+
+    # updateUser = api_list[0].updateUser
+    # print('updateUser===========', updateUser.userName)
 
     data = {'api_list': api_list, 'total_count': len(api_list), 'q': q}
     return render(request, 'api_list.html', data)
@@ -231,12 +227,6 @@ def send_request(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
-def save_api2(request):
-    ams_api = Api(apiName='hello', apiURI='www.baidu.com')
-    ams_api.save()
-    return HttpResponse("<p>数据添加成功！</p>")
-
-
 def save_api(request):
     print('save_api request param={}'.format(request.POST))
     id = request.POST.get('id', None)
@@ -258,6 +248,7 @@ def save_api(request):
             api.apiSuccessMock = apiSuccessMock
             api.apiFailureMock = apiFailureMock
             api.createTime = datetime.datetime.now()
+            api.updateUser = User(id=request.session['user']['id'])
             if request_type == 'raw':
                 api.apiRequestRaw = params_str
             api.save()
@@ -291,6 +282,7 @@ def save_api(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+######################################################test##########################################################
 def add(request):
     print('add================{}'.format(request.GET))
     # aa = request.GET['aa']
