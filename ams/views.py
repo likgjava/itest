@@ -345,7 +345,43 @@ def send_request(request):
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
 
+# ######################################################################################################
+# ####################################### test_case ####################################################
+def case_list(request):
+    q = request.POST.get('q', '')
+    project_id = request.POST.get('projectId', '')
+    print('api_list q={} projectId={}'.format(q, project_id))
 
+    user = request.session['user']
+    print('user type======', type(user))
+
+    data = {}
+    query = Api.objects
+    if q != '':
+        query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
+    if project_id != '':
+        query = query.filter(project_id=project_id)
+        data['project_id'] = int(project_id)
+    api_list = query.order_by('-createTime')
+    print('api_list======', api_list)
+
+    # updateUser = api_list[0].updateUser
+    # print('updateUser===========', updateUser.userName)
+
+    plist = Project.objects.all().values('id', 'projectName')
+
+    data['api_list'] = api_list
+    data['total_count'] = len(api_list)
+    data['q'] = q
+    data['project_list'] = plist
+    return render(request, 'case_list.html', data)
+
+
+
+
+
+
+# ######################################################################################################
 ######################################################test##########################################################
 def add(request):
     print('add================{}'.format(request.GET))
