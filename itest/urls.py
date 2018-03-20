@@ -38,10 +38,16 @@ urlpatterns = [
     path('api_test/', views.api_test),
 
     path('project_list/', views.project_list),
+    path('project_info/', views.project_info),
     path('save_project/', views.save_project),
     path('del_project/', views.del_project),
 
     path('case_list/', views.case_list),
+    path('save_group/', views.save_group),
+    path('save_case/', views.save_case),
+    path('case_detail/', views.case_detail),
+    path('del_case/', views.del_case),
+    path('to_add_case_item/', views.to_add_case_item),
 
     path('test/add/', views.add),
     path('add2/<int:a>/<int:b>/', views.add2),

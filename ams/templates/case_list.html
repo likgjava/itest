@@ -79,31 +79,32 @@
 
             <div class="row">
                 <div class="col-sm-3 col-md-2">
-                    <button type="button" class="btn btn-success" onclick="to_add_api()">+ 新建分组</button>
-
+                    <button type="button" class="btn btn-success" onclick="openGroupModal()">+ 新建分组</button>
 
                     <ul class="list-group" style="margin-top: 10px">
-                        <li class="list-group-item"><b>分组</b></li>
-                        <a href="#" class="list-group-item">所有用例</a>
-                        <a href="#" class="list-group-item active">登录模块</a>
+                        <li class="list-group-item">
+                            <b>分组</b>
+                            <a class="badge">管理</a>
+                        </li>
+                        <a href="/case_list/" class="list-group-item {% if not group_id %}active{% endif %}">所有用例{{ group_id }}</a>
+                        {% for group in group_list %}
+                            <a href="/case_list/?group_id={{ group.id }}" class="list-group-item {% ifequal group_id group.id %}active{% endifequal %}">{{ group.groupName }}</a>
+                        {% endfor %}
                     </ul>
-
-
 
                 </div>
 
                 <div class="col-sm-9 col-md-10">
                     <div class="container-fluid navbar-default" style="padding-left: 0; margin-bottom: 10px;">
                         <div class="navbar-header form-inline">
-                            <form action="/api_list/" method="post">
-                                <button type="button" class="btn btn-success" onclick="to_add_api()">+ 添加用例</button>
+                            <form action="/case_list/?group_id={{ group_id }}" method="post">
+                                <button type="button" class="btn btn-success" onclick="openCaseModal()">+ 添加用例</button>
                                 <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="搜索用例">
                                 <button type="submit" class="btn btn-default">搜索</button>
                             </form>
                         </div>
                         <div class="nav navbar-nav navbar-right"></div>
                     </div>
-
 
                     <div class="table-responsive">
                         <table id="paramTable" class="table table-striped">
@@ -115,21 +116,21 @@
                             </tr>
                             </thead>
                             <tbody>
-                            {% for api in api_list %}
+                            {% for case in case_list %}
                                 <tr>
-                                    <td>{{ api.apiName }}</td>
-                                    <td>{{ api.updateTime|date:"Y-m-d H:i:s" }}</td>
+                                    <td>{{ case.caseName }}</td>
+                                    <td>{{ case.updateTime|date:"Y-m-d H:i:s" }}</td>
                                     <td>
                                         <button title="详情" type="button" class="btn btn-default btn-sm"
-                                                onclick="to_api_detail({{ api.id }})">
+                                                onclick="to_case_detail({{ case.id }})">
                                             <span class="glyphicon glyphicon-eye-open"></span>
                                         </button>
                                         <button title="修改" type="button" class="btn btn-default btn-sm"
-                                                onclick="to_edit_api({{ api.id }})">
+                                                onclick="openCaseModal({{ case.id }}, {{ case.group.id }}, '{{ case.caseName }}')">
                                             <span class="glyphicon glyphicon-edit"></span>
                                         </button>
                                         <button title="删除" type="button" class="btn btn-default btn-sm"
-                                                onclick="delApi(this, {{ api.id }})">
+                                                onclick="delCase(this, {{ case.id }})">
                                             <span class="glyphicon glyphicon-trash"></span>
                                         </button>
                                     </td>
@@ -149,90 +150,168 @@
 </div>
 
 
-<!--模板-->
-<table style="display: none">
-    <tbody id="headerTrTemplate">
-    <tr>
-        <td>
-            <div class="input-group">
-                <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
-                <div class="input-group-btn">
-                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                        <span class="caret"></span>
-                    </button>
-                    <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
-                </div>
+<!-- 模态框（Modal） -->
+<div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="myModalLabel">新增分组</h4>
             </div>
-        </td>
-        <td>
-            <input type="text" class="form-control" name="header_value" onkeyup="changeHeaderValue(this)"
-                   placeholder="头部内容">
-        </td>
-        <td style="display: none">
-            <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
-                <span class="glyphicon glyphicon-trash"></span>
-            </button>
-        </td>
-    </tr>
-    </tbody>
-</table>
-<table style="display: none">
-    <tbody id="paramTrTemplate">
-    <tr>
-        <td>
-            <input type="text" class="form-control" name="param_name" placeholder="参数名">
-        </td>
-        <td>
-            <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)"
-                   placeholder="参数值">
-        </td>
-        <td style="display: none">
-            <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
-                <span class="glyphicon glyphicon-trash"></span>
-            </button>
-        </td>
-    </tr>
-    </tbody>
-</table>
+            <div class="modal-body">
+                <form class="form-horizontal" role="form" id="groupForm">
+                    <input type="hidden" id="projectId" name="projectId">
+                    <div class="form-group">
+                        <label for="groupName" class="col-sm-2 control-label">分组名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="groupName" name="groupName" placeholder="1~32位字符串" maxlength="32">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="save_group()">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="modal fade" id="caseModal" tabindex="-1" role="dialog" aria-labelledby="caseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+                <h4 class="modal-title" id="caseModalLabel">新增用例</h4>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal" role="form" id="caseForm">
+                    <input type="hidden" id="caseId" name="caseId">
+                    <div class="form-group">
+                        <label for="caseGroupId" class="col-sm-2 control-label">分组</label>
+                        <div class="col-sm-10">
+                            <select class="form-control" id="caseGroupId">
+                                {% for group in group_list %}
+                                    <option value="{{ group.id }}">{{ group.groupName }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="caseName" class="col-sm-2 control-label">用例名称</label>
+                        <div class="col-sm-10">
+                            <input type="text" class="form-control" id="caseName" name="caseName" placeholder="1~32位字符串" maxlength="32">
+                        </div>
+                    </div>
+                </form>
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button type="button" class="btn btn-primary" onclick="save_case()">提交</button>
+            </div>
+        </div>
+    </div>
+</div>
 
 <script type="text/javascript">
-    function delApi(dom, apiId) {
-        if (confirm('确定删除该API吗？')) {
-            $.post('/del_api/', {apiId: apiId}, function (json) {
-                $(dom).parent().parent().remove();
+    function delCase(dom, id) {
+        if (confirm('确定删除该用例吗？')) {
+            $.post('/del_case/', {id: id}, function (json) {
+                if (json.code === '0000') {
+                    window.location.href = '/case_list/?group_id={{ group_id }}';
+                } else {
+                    alert(json.msg);
+                }
             });
         }
     }
 
-    function to_add_api() {
-        window.location.href = '/add_api/';
+    function openGroupModal(id, name, version) {
+        $('#groupForm')[0].reset();
+        //修改
+        if(id){
+            $('#myModalLabel').html('修改项目');
+            $('#projectId').val(id);
+            $('#projectName').val(name);
+            $('#projectVersion').val(version);
+
+        }else{
+            $('#myModalLabel').html('新增分组');
+        }
+        $('#groupModal').modal('show');
+    }
+    function openCaseModal(id, groupId, name) {
+        $('#caseForm')[0].reset();
+        //修改
+        if(id){
+            $('#caseModalLabel').html('修改用例');
+            $('#caseId').val(id);
+            $('#caseGroupId').val(groupId);
+            $('#caseName').val(name);
+        }else{
+            $('#caseModalLabel').html('新增用例');
+        }
+        $('#caseModal').modal('show');
     }
 
-    function to_api_detail(apiId) {
-        window.location.href = '/api_detail/?apiId=' + apiId;
+    function save_group() {
+        var $form = $("#groupForm");
+        var bv = $form.data('formValidation');
+        bv.validate();
+        if(!bv.isValid()){
+            return false;
+        }
+
+        var data = {};
+        if($('#projectId').val() !== ''){
+            data['id'] = $('#projectId').val();
+        }
+        data['groupName'] = $('#groupName').val();
+        $.post('/save_group/', data, function (json) {
+            if(json.code === '0000'){
+                alert('保存成功');
+                $('#groupModal').modal('hide');
+                window.location.href = '/case_list/';
+            }else{
+                alert(json.msg);
+            }
+        });
+    }
+    function save_case() {
+        var $form = $("#caseForm");
+        var bv = $form.data('formValidation');
+        bv.validate();
+        if(!bv.isValid()){
+            return false;
+        }
+
+        var data = {};
+        if($('#caseId').val() !== ''){
+            data['id'] = $('#caseId').val();
+        }
+        var caseGroupId = $('#caseGroupId').val();
+        data['caseGroupId'] = caseGroupId;
+        data['caseName'] = $('#caseName').val();
+        $.post('/save_case/', data, function (json) {
+            if(json.code === '0000'){
+                alert('保存成功');
+                $('#caseModal').modal('hide');
+                window.location.href = '/case_list/?group_id='+caseGroupId;
+            }else{
+                alert(json.msg);
+            }
+        });
+    }
+
+    function to_case_detail(id) {
+        window.location.href = '/case_detail/?id=' + id;
     }
 
     function to_edit_api(apiId) {
         window.location.href = '/edit_api/?apiId=' + apiId;
     }
 
-    function changeHeaderValue(dom) {
-        var nextTr = $(dom).parent().parent().next();
-        if ($(dom).val() !== '' && nextTr.html() == null) {
-            $(dom).parent().parent().find('td:last').show();
-            $(dom).parent().parent().parent().append($('#headerTrTemplate').html());
-
-            $(dom).parent().parent().parent().find('input[name=headerLabel]').bsSuggest(headerLabelData);
-        }
-    }
-
-    function changeParamValue(dom) {
-        var nextTr = $(dom).parent().parent().next();
-        if ($(dom).val() !== '' && nextTr.html() == null) {
-            $(dom).parent().parent().find('td:last').show();
-            $(dom).parent().parent().parent().append($('#paramTrTemplate').html());
-        }
-    }
 
     function add_api() {
         window.location.href = '/add_api'
@@ -242,115 +321,6 @@
         $(dom).parent().parent().remove();
     }
 
-    function send_request() {
-        var $form = $("#defaultForm");
-        var bv = $form.data('formValidation');
-        bv.validate();
-        if (!bv.isValid()) {
-            return false;
-        }
-
-        var data = {};
-        data['protocol'] = $('#protocol').val();
-        data['method'] = $('#method').val();
-        data['name'] = $('#name').val();
-        data['uri'] = $('#uri').val();
-
-        var headers = {};
-        $('#headerTable').find('tbody tr').each(function (i, dom) {
-            var label = $(dom).find('input[name="headerLabel"]').val();
-            var value = $(dom).find('input[name="header_value"]').val();
-            if (label != null && label !== '') {
-                headers[label] = value;
-            }
-        });
-        data['headers'] = JSON.stringify(headers);
-
-        //请求参数
-        if ($('#formBut').hasClass('btn-success')) {
-            var params = {};
-            $('#paramTable').find('tbody tr').each(function (i, dom) {
-                var name = $(dom).find('input[name="param_name"]').val();
-                var value = $(dom).find('input[name="param_value"]').val();
-                if (name != null && name !== '') {
-                    params[name] = value;
-                }
-            });
-            data['params'] = JSON.stringify(params);
-            data['requestType'] = 'formData';
-        } else {
-            data['params'] = $('#raw').val();
-            data['requestType'] = 'raw';
-        }
-
-        $.post('/send_request/', data, function (json) {
-            $('#httpCode').html(json.httpCode);
-            $('#takeTime').html('time：' + json.takeTime + 'ms');
-            if (json.httpCode == 200) {
-                $('#httpCode').parent().removeClass('test-error').addClass('test-success');
-            } else {
-                $('#httpCode').parent().removeClass('test-success').addClass('test-error');
-            }
-            $('#response_body').html(json.body);
-            $('#httpCode').parent().show();
-
-            var html = '';
-            for (var key in json.headers) {
-                html += '<span class="test-header-key">' + key + '</span>: ' + json.headers[key] + '<br/>';
-            }
-            $('#response_header').html(html);
-        });
-    }
-
-    function save_api() {
-        var $form = $("#defaultForm");
-        var bv = $form.data('formValidation');
-        bv.validate();
-        if (!bv.isValid()) {
-            return false;
-        }
-
-        var data = {};
-        data['protocol'] = $('#protocol').val();
-        data['method'] = $('#method').val();
-        data['name'] = $('#name').val();
-        data['uri'] = $('#uri').val();
-
-        var headers = {};
-        $('#headerTable').find('tbody tr').each(function (i, dom) {
-            var label = $(dom).find('input[name="headerLabel"]').val();
-            var value = $(dom).find('input[name="header_value"]').val();
-            if (label != null && label !== '') {
-                headers[label] = value;
-            }
-        });
-        data['headers'] = JSON.stringify(headers);
-
-        //请求参数
-        if ($('#formBut').hasClass('btn-success')) {
-            var params = {};
-            $('#paramTable').find('tbody tr').each(function (i, dom) {
-                var name = $(dom).find('input[name="param_name"]').val();
-                var value = $(dom).find('input[name="param_value"]').val();
-                if (name != null && name !== '') {
-                    params[name] = value;
-                }
-            });
-            data['params'] = JSON.stringify(params);
-            data['requestType'] = 'formData';
-        } else {
-            data['params'] = $('#raw').val();
-            data['requestType'] = 'raw';
-        }
-
-        $.post('/save_api/', data, function (json) {
-            if (json.success) {
-                alert('保存成功');
-            } else {
-                alert('保存失败');
-            }
-        });
-    }
 
 
     $(document).ready(function () {
@@ -358,7 +328,7 @@
 
         $('input[name=headerLabel]').bsSuggest(headerLabelData);
 
-        $('#defaultForm').formValidation({
+        $('#groupForm').formValidation({
             //err: {
             //    container: 'tooltip'
             //},
@@ -369,7 +339,27 @@
                 validating: 'glyphicon glyphicon-refresh'
             },
             fields: {
-                uri: {
+                groupName: {
+                    validators: {
+                        notEmpty: {
+                            message: '请填写此字段'
+                        }
+                    }
+                }
+            }
+        });
+        $('#caseForm').formValidation({
+            //err: {
+            //    container: 'tooltip'
+            //},
+            trigger: 'blur',
+            icon: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                caseName: {
                     validators: {
                         notEmpty: {
                             message: '请填写此字段'

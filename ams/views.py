@@ -8,11 +8,11 @@ import time
 
 from django.db import transaction
 from django.db.models import Q
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 # Create your views here.
-from ams.models import Api, Api_header, Api_request_param, User, Project
+from ams.models import Api, Api_header, Api_request_param, User, Project, Test_case_group, Test_case, Test_case_item
 
 
 def to_login(request):
@@ -81,11 +81,31 @@ def check_user_name_exist(request):
     return HttpResponse(json.dumps(data), content_type="application/json")
 
 
+# ######################################################################################################
 # ####################################### project ##########################################################
 def project_list(request):
     plist = Project.objects.all()
     data = {'project_list': plist, 'total_count': len(plist)}
+
+    request.session['pid'] = None
+    request.session['pname'] = None
     return render(request, 'project_list.html', data)
+
+
+def project_info(request):
+    pid = request.GET.get('pid', None)
+    if pid:
+        plist = Project.objects.all()
+        data = {'project_list': plist}
+
+        project = Project.objects.get(id=pid)
+        data['project'] = project
+
+        request.session['pid'] = pid
+        request.session['pname'] = project.projectName
+        return render(request, 'project_info.html', data)
+    else:
+        return HttpResponseRedirect('/project_list/')
 
 
 def save_project(request):
@@ -345,41 +365,130 @@ def send_request(request):
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
 
+
 # ######################################################################################################
 # ####################################### test_case ####################################################
 def case_list(request):
     q = request.POST.get('q', '')
+    group_id = request.GET.get('group_id', None)
     project_id = request.POST.get('projectId', '')
-    print('api_list q={} projectId={}'.format(q, project_id))
+    print('case_list q={} group_id={}'.format(q, group_id))
 
     user = request.session['user']
     print('user type======', type(user))
 
+    # 获取分组数据
     data = {}
-    query = Api.objects
+    group_list = Test_case_group.objects.all()
+    data['group_list'] = group_list
+
+    query = Test_case.objects
     if q != '':
         query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
-    if project_id != '':
-        query = query.filter(project_id=project_id)
-        data['project_id'] = int(project_id)
-    api_list = query.order_by('-createTime')
-    print('api_list======', api_list)
+    if group_id:
+        query = query.filter(group=Test_case_group(id=group_id))
+        data['group_id'] = int(group_id)
+    case_list = query.order_by('-createTime')
+    print('case_list======', case_list)
 
     # updateUser = api_list[0].updateUser
     # print('updateUser===========', updateUser.userName)
 
     plist = Project.objects.all().values('id', 'projectName')
 
-    data['api_list'] = api_list
-    data['total_count'] = len(api_list)
+    data['case_list'] = case_list
     data['q'] = q
     data['project_list'] = plist
     return render(request, 'case_list.html', data)
 
 
+def save_group(request):
+    print('save_group request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
+    groupName = request.POST['groupName']
+
+    result = {}
+    try:
+        pid = request.session['pid']
+        project = Project(id=pid)
+        group = Test_case_group(id=id, groupName=groupName, project=project)
+        group.save()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+def save_case(request):
+    print('save_case request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
+    caseGroupId = request.POST['caseGroupId']
+    caseName = request.POST['caseName']
 
+    result = {}
+    try:
+        pid = request.session['pid']
+        project = Project(id=pid)
+        group = Test_case_group(id=caseGroupId)
+        case = Test_case(id=id, caseName=caseName, project=project, group=group)
+        case.save()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def case_detail(request):
+    id = request.GET['id']
+    print('case_detail id={}'.format(id))
+
+    data = {}
+    case = Test_case.objects.get(id=id)
+    data['case'] = case
+
+    item_list = Test_case_item.objects.filter(case=Test_case(id=id))
+    data['item_list'] = item_list
+
+
+    return render(request, 'case_detail.html', data)
+
+
+def del_case(request):
+    case_id = request.POST['id']
+    print('del_case case_id={}'.format(case_id))
+
+    result = {}
+    try:
+        with transaction.atomic():
+            Test_case.objects.filter(id=case_id).delete()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        result['msg'] = str(e)
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+def to_add_case_item(request):
+    caseId = request.GET['caseId']
+    print('to_add_case_item caseId={}'.format(caseId))
+
+    data = {'caseId':caseId}
+    # case = Test_case.objects.get(id=id)
+    # data['case'] = case
+    #
+    # item_list = Test_case_item.objects.filter(case=Test_case(id=id))
+    # data['item_list'] = item_list
+
+
+    return render(request, 'add_case_item.html', data)
 
 # ######################################################################################################
 ######################################################test##########################################################

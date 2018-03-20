@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="title" content="iTest接口管理系统">
+    <meta name="description" content="iTest接口管理系统">
+    <meta name="keywords" content="iTest接口管理系统">
+
+    <!-- Le styles -->
+    <link href="/static/js/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/js/select2/css/select2.min.css" rel="stylesheet">
+    <link href="/static/js/formValidation/css/formValidation.min.css" rel="stylesheet">
+
+     <!-- Custom styles for this template -->
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+
+    <!-- Fav and touch icons -->
+    <link rel="shortcut icon" href="http://www.runoob.com/favicon.ico">
+
+    <script type="text/javascript" src="/static/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/select2/js/select2.min.js"></script>
+    <script type="text/javascript" src="/static/js/suggest/bootstrap-suggest.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/formValidation.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/framework/bootstrap.js"></script>
+    <style>
+        .test-header-key{color: #9e9e9e;}
+        .test-httpHeader-content {
+            height: 30px;
+            line-height: 30px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+            color: #fff;
+            margin: 10px 0;
+            text-indent: 10px;
+            font-size: 16px;
+        }
+        .test-httpHeader-content .time {
+            font-size: 12px;
+            color: #fff;
+            margin-right: 10px;
+        }
+        .back-result-content{
+            width: calc(100% - 2px);
+            margin-top: 10px;
+        }
+        .test-error{background-color: #d32f2f;}
+        .test-success{background-color: #4caf50;}
+    </style>
+
+</head>
+<body>
+{% include 'header.html' %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            {% include 'sidebar.html' %}
+        </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+            <div class="container-fluid" style="padding-left: 0; margin-bottom: 10px;">
+                <div class="navbar-header">
+                    <button type="button" class="btn btn-default" onclick="to_case_detail({{ caseId }})">&lt; 返回列表</button>
+                </div>
+                <div class="nav navbar-nav navbar-right">
+                    <button type="button" class="btn btn-success" onclick="save_api()">保存</button>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-body">
+                    <form id="defaultForm" class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="name" class="col-sm-2 control-label">接口名称：</label>
+                            <div class="col-sm-10">
+                                <input type="text" class="form-control" id="name">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="uri" class="col-sm-2 control-label">请求地址：</label>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="method" onchange="changeMethod(this)">
+                                    <option value="POST">POST</option>
+                                    <option value="GET">GET</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-2">
+                                <select class="form-control" id="protocol">
+                                    <option value="HTTP">HTTP</option>
+                                    <option value="HTTPS">HTTPS</option>
+                                </select>
+                            </div>
+                            <div class="col-sm-6">
+                                <input type="text" class="form-control" id="uri" name="uri" placeholder="测试地址">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">请求头部</div>
+                <div class="panel-body">
+                    <table id="headerTable" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>标签</th>
+                            <th>内容</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
+                                    <div class="input-group-btn">
+                                        <button type="button" class="btn btn-default dropdown-toggle"
+                                                data-toggle="dropdown">
+                                            <span class="caret"></span>
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="header_value"
+                                       onkeyup="changeHeaderValue(this)" placeholder="头部内容">
+                            </td>
+                            <td style="display: none">
+                                <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+
+            <div class="panel panel-default">
+                <div class="panel-heading">请求参数</div>
+                <div class="panel-body">
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success" onclick="selectRequestParamTab(this, 'form')" id="formBut">表单[form-data]</button>
+                        <button type="button" class="btn btn-default" onclick="selectRequestParamTab(this, 'raw')" id="rawBut">源数据[raw]</button>
+                    </div>
+                    <div class="table-responsive">
+                        <table id="paramTable" class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>参数名</th>
+                                <th>参数值</th>
+                                <th>操作</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>
+                                    <input type="text" class="form-control" name="param_name" placeholder="参数名">
+                                </td>
+                                <td>
+                                    <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)" placeholder="参数值">
+                                </td>
+                                <td style="display: none">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                                        <span class="glyphicon glyphicon-trash"></span>
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div id="rawDiv" style="display: none; margin-top: 10px;">
+                        <textarea id="raw" class="form-control" rows="4" placeholder="源数据"></textarea>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel panel-default">
+                <div class="panel-heading">测试结果校验规则</div>
+                <div class="panel-body">
+                    <div class="btn-group">
+                        <!--校验类型[0:不校验; 1:完全校验; 2:正则校验; 3:json校验]-->
+                        <button type="button" class="btn btn-success" onclick="selectMatchType(this, 0)" id="formBut">不校验</button>
+                        <button type="button" class="btn btn-default" onclick="selectMatchType(this, 3)" id="rawBut">Json校验</button>
+                        <button type="button" class="btn btn-default" onclick="selectMatchType(this, 1)" id="rawBut">完全校验</button>
+                        <button type="button" class="btn btn-default" onclick="selectMatchType(this, 2)" id="rawBut">正则校验</button>
+                    </div>
+
+                    <div class="form-inline" id="statusCodeDiv" style="margin-top: 10px">
+                        <select class="form-control">
+                            <option value="200" selected="selected">200</option>
+                            <option value="302">302</option>
+                            <option value="404">404</option>
+                            <option value="500">500</option>
+                            <option value="502">502</option>
+                            <option value="0" class="ng-binding">自定义</option>
+                        </select>
+                        <input type="text" class="form-control" name="param_name" placeholder="状态码">
+                    </div>
+
+                    <table id="jsonCheckTable" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>校验规则</th>
+                            <th>校验值</th>
+                            <th>操作</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td>
+                                <input type="text" class="form-control" name="param_name" placeholder="参数名">
+                            </td>
+                            <td>
+                                <select class="form-control">
+                                    <option value="0" class="ng-binding" selected="selected">无</option>
+                                    <option value="1" class="ng-binding">等于 [ = ]</option>
+                                    <option value="2" class="ng-binding">不等于 [ != ]</option>
+                                    <option value="3" class="ng-binding">大于 [ &gt; ]</option>
+                                    <option value="4" class="ng-binding">小于 [ &lt; ]</option>
+                                    <option value="5" class="ng-binding">正则 [ Reg= ]</option>
+                                </select>
+                            </td>
+                            <td>
+                                <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)" placeholder="参数值">
+                            </td>
+                            <td style="display: none">
+                                <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                                    <span class="glyphicon glyphicon-trash"></span>
+                                </button>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+
+                    <div id="textCheckDiv" style="display: none; margin-top: 10px;">
+                        <textarea id="raw" class="form-control" rows="4" placeholder="校验表达式"></textarea>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<!--模板-->
+<table style="display: none">
+    <tbody id="headerTrTemplate">
+    <tr>
+        <td>
+            <div class="input-group">
+                <input type="text" class="form-control" name="headerLabel" placeholder="头部标签">
+                <div class="input-group-btn">
+                    <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                        <span class="caret"></span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-right" role="menu"></ul>
+                </div>
+            </div>
+        </td>
+        <td>
+            <input type="text" class="form-control" name="header_value" onkeyup="changeHeaderValue(this)"
+                   placeholder="头部内容">
+        </td>
+        <td style="display: none">
+            <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                <span class="glyphicon glyphicon-trash"></span>
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+<table style="display: none">
+    <tbody id="paramTrTemplate">
+    <tr>
+        <td>
+            <input type="text" class="form-control" name="param_name" placeholder="参数名">
+        </td>
+        <td>
+            <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)"
+                   placeholder="参数值">
+        </td>
+        <td style="display: none">
+            <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
+                <span class="glyphicon glyphicon-trash"></span>
+            </button>
+        </td>
+    </tr>
+    </tbody>
+</table>
+
+<script type="text/javascript">
+    function to_api_list() {
+        window.location.href = '/api_list/'
+    }
+    function to_case_detail(id) {
+        window.location.href = '/case_detail/?id=' + id;
+    }
+    function changeMethod(dom) {
+        var rawBut = $('#rawBut');
+        if($(dom).val() === 'POST'){
+            rawBut.show();
+        }else{
+            rawBut.hide();
+            if(rawBut.hasClass('btn-success')){
+                rawBut.siblings().click();
+            }
+        }
+    }
+    function selectMatchType(dom, type) {
+        $(dom).removeClass('btn-default').addClass('btn-success');
+        $(dom).siblings().removeClass('btn-success').addClass('btn-default');
+        if(type === 'form'){
+            $('#paramTable').parent().show();
+            $('#rawDiv').hide();
+        }else{
+            $('#paramTable').parent().hide();
+            $('#rawDiv').show();
+        }
+    }
+    function changeHeaderValue(dom) {
+        var nextTr = $(dom).parent().parent().next();
+        if($(dom).val() !== '' && nextTr.html() == null){
+            $(dom).parent().parent().find('td:last').show();
+            $(dom).parent().parent().parent().append($('#headerTrTemplate').html());
+
+            $(dom).parent().parent().parent().find('input[name=headerLabel]').bsSuggest(headerLabelData);
+        }
+    }
+    function changeParamValue(dom) {
+        var nextTr = $(dom).parent().parent().next();
+        if($(dom).val() !== '' && nextTr.html() == null){
+            $(dom).parent().parent().find('td:last').show();
+            $(dom).parent().parent().parent().append($('#paramTrTemplate').html());
+        }
+    }
+
+    function add_api() {
+        window.location.href = '/add_api'
+    }
+
+    function delParamTableTr(dom) {
+        $(dom).parent().parent().remove();
+    }
+
+
+    function save_api() {
+        var $form = $("#defaultForm");
+        var bv = $form.data('formValidation');
+        bv.validate();
+        if(!bv.isValid()){
+            return false;
+        }
+
+        var data = {};
+        data['projectId'] = $('#projectId').val();
+        data['protocol'] = $('#protocol').val();
+        data['method'] = $('#method').val();
+        data['name'] = $('#name').val();
+        data['uri'] = $('#uri').val();
+
+        var headers = {};
+        $('#headerTable').find('tbody tr').each(function(i,dom){
+            var label = $(dom).find('input[name="headerLabel"]').val();
+            var value = $(dom).find('input[name="header_value"]').val();
+            if (label != null && label !== ''){
+                headers[label] = value;
+            }
+        });
+        data['headers'] = JSON.stringify(headers);
+
+        //请求参数
+        if($('#formBut').hasClass('btn-success')){
+            var params = {};
+            $('#paramTable').find('tbody tr').each(function(i,dom){
+                var name = $(dom).find('input[name="param_name"]').val();
+                var value = $(dom).find('input[name="param_value"]').val();
+                if (name != null && name !== ''){
+                    params[name] = value;
+                }
+            });
+            data['params'] = JSON.stringify(params);
+            data['requestType'] = 'formData';
+        }else{
+            data['params'] = $('#raw').val();
+            data['requestType'] = 'raw';
+        }
+
+        //返回示例
+        data['apiSuccessMock'] = $('#apiSuccessMock').val();
+        data['apiFailureMock'] = $('#apiFailureMock').val();
+
+        $.post('/save_api/', data, function (json) {
+            if(json.success){
+                alert('保存成功');
+                to_api_detail(json.id);
+            }else{
+                alert('保存失败');
+            }
+        });
+    }
+
+    $(document).ready(function () {
+
+        $('input[name=headerLabel]').bsSuggest(headerLabelData);
+
+        $('#defaultForm').formValidation({
+            //err: {
+            //    container: 'tooltip'
+            //},
+            trigger: 'blur',
+            icon: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                uri: {
+                    validators: {
+                        notEmpty: {
+                            message: '请填写此字段'
+                        }
+                    }
+                }
+            }
+        });
+
+
+    });
+
+    var headerLabelData = {
+            indexId: 0,
+            indexKey: 0,
+            //showBtn: false,
+            allowNoKeyword: false,
+            inputWarnColor: null,
+            ignorecase: true,
+            data: {
+                'value': [
+                    {'v': 'Accept'},
+                    {'v': 'Accept-Charset'},
+                    {'v': 'Accept-Encoding'},
+                    {'v': 'Accept-Language'},
+                    {'v': 'Accept-Ranges'},
+                    {'v': 'Authorization'},
+                    {'v': 'Cache-Control'},
+                    {'v': 'Connection'},
+                    {'v': 'Cookie'},
+                    {'v': 'Content-Length'},
+                    {'v': 'Content-Type'},
+                    {'v': 'Content-MD5'},
+                    {'v': 'Date'},
+                    {'v': 'Expect'},
+                    {'v': 'From'},
+                    {'v': 'Host'},
+                    {'v': 'If-Match'},
+                    {'v': 'If-Modified-Since'},
+                    {'v': 'If-None-Match'},
+                    {'v': 'If-Range'},
+                    {'v': 'If-Unmodified-Since'},
+                    {'v': 'Max-Forwards'},
+                    {'v': 'Origin'},
+                    {'v': 'Pragma'},
+                    {'v': 'Proxy-Authorization'},
+                    {'v': 'Range'},
+                    {'v': 'Referer'},
+                    {'v': 'TE'},
+                    {'v': 'Upgrade'},
+                    {'v': 'User-Agent'},
+                    {'v': 'Via'},
+                    {'v': 'Warning'}
+                ]
+            }
+        };
+
+</script>
+</body>
+</html>

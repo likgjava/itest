@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="title" content="iTest接口管理系统">
+    <meta name="description" content="iTest接口管理系统">
+    <meta name="keywords" content="iTest接口管理系统">
+
+    <!-- Le styles -->
+    <link href="/static/js/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/js/select2/css/select2.min.css" rel="stylesheet">
+    <link href="/static/js/formValidation/css/formValidation.min.css" rel="stylesheet">
+
+     <!-- Custom styles for this template -->
+    <link href="/static/css/dashboard.css" rel="stylesheet">
+
+    <!-- Fav and touch icons -->
+    <link rel="shortcut icon" href="http://www.runoob.com/favicon.ico">
+
+    <script type="text/javascript" src="/static/js/jquery/jquery.min.js"></script>
+    <script type="text/javascript" src="/static/js/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/select2/js/select2.min.js"></script>
+    <script type="text/javascript" src="/static/js/suggest/bootstrap-suggest.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/formValidation.min.js"></script>
+    <script type="text/javascript" src="/static/js/formValidation/js/framework/bootstrap.js"></script>
+    <style>
+        .test-header-key{color: #9e9e9e;}
+        .test-httpHeader-content {
+            height: 30px;
+            line-height: 30px;
+            -webkit-border-radius: 3px;
+            border-radius: 3px;
+            color: #fff;
+            margin: 10px 0;
+            text-indent: 10px;
+            font-size: 16px;
+        }
+        .test-httpHeader-content .time {
+            font-size: 12px;
+            color: #fff;
+            margin-right: 10px;
+        }
+        .back-result-content{
+            width: calc(100% - 2px);
+            margin-top: 10px;
+        }
+        .test-error{background-color: #d32f2f;}
+        .test-success{background-color: #4caf50;}
+
+    </style>
+
+</head>
+<body>
+{% include 'header.html' %}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-sm-3 col-md-2 sidebar">
+            {% include 'sidebar.html' %}
+        </div>
+
+        <div class="col-sm-9 col-sm-offset-3 col-md-10 col-md-offset-2 main">
+
+            <div class="container-fluid" style="padding-left: 0; margin-bottom: 10px;">
+                <div class="navbar-header">
+                    <button type="button" class="btn btn-default" onclick="to_case_list()">&lt;用例列表</button>
+                    &nbsp;&nbsp;
+                    <button type="button" class="btn btn-success" onclick="to_edit_api({{ api.id }})">+ 已有接口</button>
+                    <button type="button" class="btn btn-success" onclick="to_add_case_item({{ case.id }})">+ 空白接口</button>
+                </div>
+                <div class="nav navbar-nav navbar-right">
+                </div>
+            </div>
+
+
+            <table id="headerTable" class="table table-striped">
+                <thead>
+                <tr>
+                    <th>顺序</th>
+                    <th>接口名称</th>
+                    <th>URI</th>
+                    <th>操作</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for header in header_list %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ header.headerName }}</td>
+                        <td>{{ header.headerValue }}</td>
+                        <td>
+                            <button title="详情" type="button" class="btn btn-default btn-sm"
+                                    onclick="to_case_detail({{ case.id }})">
+                                <span class="glyphicon glyphicon-eye-open"></span>
+                            </button>
+                            <button title="修改" type="button" class="btn btn-default btn-sm"
+                                    onclick="openCaseModal({{ case.id }}, {{ case.group.id }}, '{{ case.caseName }}')">
+                                <span class="glyphicon glyphicon-edit"></span>
+                            </button>
+                            <button title="删除" type="button" class="btn btn-default btn-sm"
+                                    onclick="delCase(this, {{ case.id }})">
+                                <span class="glyphicon glyphicon-trash"></span>
+                            </button>
+                        </td>
+                    </tr>
+                {% endfor %}
+                <tr>
+                        <td>111</td>
+                        <td>111</td>
+                        <td>111</td>
+                        <td>111</td>
+                    </tr>
+                </tbody>
+            </table>
+
+
+
+
+
+        </div>
+    </div>
+</div>
+
+
+<script type="text/javascript">
+    function to_case_list() {
+        window.location.href = '/case_list/'
+    }
+    function to_add_case_item(caseId) {
+        window.location.href = '/to_add_case_item/?caseId='+caseId;
+    }
+    function to_edit_api(apiId) {
+        window.location.href = '/edit_api/?apiId='+apiId;
+    }
+    function changeMethod(dom) {
+        var rawBut = $('#rawBut');
+        if($(dom).val() === 'POST'){
+            rawBut.show();
+        }else{
+            rawBut.hide();
+            if(rawBut.hasClass('btn-success')){
+                rawBut.siblings().click();
+            }
+        }
+    }
+    function selectRequestParamTab(dom, type) {
+        $(dom).removeClass('btn-default').addClass('btn-success');
+        $(dom).siblings().removeClass('btn-success').addClass('btn-default');
+        if(type === 'form'){
+            $('#paramTable').parent().show();
+            $('#rawDiv').hide();
+        }else{
+            $('#paramTable').parent().hide();
+            $('#rawDiv').show();
+        }
+    }
+    function changeHeaderValue(dom) {
+        var nextTr = $(dom).parent().parent().next();
+        if($(dom).val() !== '' && nextTr.html() == null){
+            $(dom).parent().parent().find('td:last').show();
+            $(dom).parent().parent().parent().append($('#headerTrTemplate').html());
+
+            $(dom).parent().parent().parent().find('input[name=headerLabel]').bsSuggest(headerLabelData);
+        }
+    }
+    function changeParamValue(dom) {
+        var nextTr = $(dom).parent().parent().next();
+        if($(dom).val() !== '' && nextTr.html() == null){
+            $(dom).parent().parent().find('td:last').show();
+            $(dom).parent().parent().parent().append($('#paramTrTemplate').html());
+        }
+    }
+
+    function add_api() {
+        window.location.href = '/add_api'
+    }
+
+    function delParamTableTr(dom) {
+        $(dom).parent().parent().remove();
+    }
+
+    function send_request() {
+        var $form = $("#defaultForm");
+        var bv = $form.data('formValidation');
+        bv.validate();
+        if(!bv.isValid()){
+            return false;
+        }
+
+        var data = {};
+        data['protocol'] = $('#protocol').val();
+        data['method'] = $('#method').val();
+        data['name'] = $('#name').val();
+        data['uri'] = $('#uri').val();
+
+        var headers = {};
+        $('#headerTable').find('tbody tr').each(function(i,dom){
+            var label = $(dom).find('input[name="headerLabel"]').val();
+            var value = $(dom).find('input[name="header_value"]').val();
+            if (label != null && label !== ''){
+                headers[label] = value;
+            }
+        });
+        data['headers'] = JSON.stringify(headers);
+
+        //请求参数
+        if($('#formBut').hasClass('btn-success')){
+            var params = {};
+            $('#paramTable').find('tbody tr').each(function(i,dom){
+                var name = $(dom).find('input[name="param_name"]').val();
+                var value = $(dom).find('input[name="param_value"]').val();
+                if (name != null && name !== ''){
+                    params[name] = value;
+                }
+            });
+            data['params'] = JSON.stringify(params);
+            data['requestType'] = 'formData';
+        }else{
+            data['params'] = $('#raw').val();
+            data['requestType'] = 'raw';
+        }
+
+        $.post('/send_request/', data, function (json) {
+            $('#httpCode').html(json.httpCode);
+            $('#takeTime').html('time：'+json.takeTime+'ms');
+            if (json.httpCode == 200) {
+                $('#httpCode').parent().removeClass('test-error').addClass('test-success');
+            }else{
+                $('#httpCode').parent().removeClass('test-success').addClass('test-error');
+            }
+            $('#response_body').html(json.body);
+            $('#httpCode').parent().show();
+
+            var html = '';
+            for (var key in json.headers){
+                html += '<span class="test-header-key">'+key + '</span>: ' + json.headers[key] + '<br/>';
+            }
+            $('#response_header').html(html);
+        });
+    }
+
+    function save_api() {
+        var $form = $("#defaultForm");
+        var bv = $form.data('formValidation');
+        bv.validate();
+        if(!bv.isValid()){
+            return false;
+        }
+
+        var data = {};
+        data['protocol'] = $('#protocol').val();
+        data['method'] = $('#method').val();
+        data['name'] = $('#name').val();
+        data['uri'] = $('#uri').val();
+
+        var headers = {};
+        $('#headerTable').find('tbody tr').each(function(i,dom){
+            var label = $(dom).find('input[name="headerLabel"]').val();
+            var value = $(dom).find('input[name="header_value"]').val();
+            if (label != null && label !== ''){
+                headers[label] = value;
+            }
+        });
+        data['headers'] = JSON.stringify(headers);
+
+        //请求参数
+        if($('#formBut').hasClass('btn-success')){
+            var params = {};
+            $('#paramTable').find('tbody tr').each(function(i,dom){
+                var name = $(dom).find('input[name="param_name"]').val();
+                var value = $(dom).find('input[name="param_value"]').val();
+                if (name != null && name !== ''){
+                    params[name] = value;
+                }
+            });
+            data['params'] = JSON.stringify(params);
+            data['requestType'] = 'formData';
+        }else{
+            data['params'] = $('#raw').val();
+            data['requestType'] = 'raw';
+        }
+
+        $.post('/save_api/', data, function (json) {
+            if(json.success){
+                alert('保存成功');
+            }else{
+                alert('保存失败');
+            }
+        });
+    }
+
+
+
+    $(document).ready(function () {
+
+        $('input[name=headerLabel]').bsSuggest(headerLabelData);
+
+        $('#defaultForm').formValidation({
+            //err: {
+            //    container: 'tooltip'
+            //},
+            trigger: 'blur',
+            icon: {
+                valid: 'glyphicon glyphicon-ok',
+                invalid: 'glyphicon glyphicon-remove',
+                validating: 'glyphicon glyphicon-refresh'
+            },
+            fields: {
+                uri: {
+                    validators: {
+                        notEmpty: {
+                            message: '请填写此字段'
+                        }
+                    }
+                }
+            }
+        });
+
+
+    });
+
+    var headerLabelData = {
+            indexId: 0,
+            indexKey: 0,
+            //showBtn: false,
+            allowNoKeyword: false,
+            inputWarnColor: null,
+            ignorecase: true,
+            data: {
+                'value': [
+                    {'v': 'Accept'},
+                    {'v': 'Accept-Charset'},
+                    {'v': 'Accept-Encoding'},
+                    {'v': 'Accept-Language'},
+                    {'v': 'Accept-Ranges'},
+                    {'v': 'Authorization'},
+                    {'v': 'Cache-Control'},
+                    {'v': 'Connection'},
+                    {'v': 'Cookie'},
+                    {'v': 'Content-Length'},
+                    {'v': 'Content-Type'},
+                    {'v': 'Content-MD5'},
+                    {'v': 'Date'},
+                    {'v': 'Expect'},
+                    {'v': 'From'},
+                    {'v': 'Host'},
+                    {'v': 'If-Match'},
+                    {'v': 'If-Modified-Since'},
+                    {'v': 'If-None-Match'},
+                    {'v': 'If-Range'},
+                    {'v': 'If-Unmodified-Since'},
+                    {'v': 'Max-Forwards'},
+                    {'v': 'Origin'},
+                    {'v': 'Pragma'},
+                    {'v': 'Proxy-Authorization'},
+                    {'v': 'Range'},
+                    {'v': 'Referer'},
+                    {'v': 'TE'},
+                    {'v': 'Upgrade'},
+                    {'v': 'User-Agent'},
+                    {'v': 'Via'},
+                    {'v': 'Warning'}
+                ]
+            }
+        };
+
+</script>
+</body>
+</html>

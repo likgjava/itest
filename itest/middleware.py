@@ -28,4 +28,4 @@ class ExteriorAuthMiddleware(MiddlewareMixin):
         elif request.session.has_key('user'):
             # 如果是登录则转到首页
             if request.path in ['/', '/to_login/']:
-                return HttpResponseRedirect('/api_list/')
+                return HttpResponseRedirect('/project_list/')

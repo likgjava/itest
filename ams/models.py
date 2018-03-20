@@ -42,3 +42,25 @@ class Api_request_param(models.Model):
     paramName = models.CharField(max_length=255)
     paramValue = models.CharField(max_length=255)
     apiID = models.IntegerField()
+
+
+class Test_case_group(models.Model):
+    groupName = models.CharField(max_length=255)
+    project = models.ForeignKey(Project, on_delete=False)
+
+
+class Test_case(models.Model):
+    caseName = models.CharField(max_length=255)
+    project = models.ForeignKey(Project, on_delete=False)
+    group = models.ForeignKey(Test_case_group, on_delete=False)
+    updateTime = models.DateTimeField()
+    createTime = models.DateTimeField(auto_now_add=False)
+
+
+class Test_case_item(models.Model):
+    caseData = models.CharField(max_length=255)
+    statusCode = models.CharField(max_length=255)
+    apiName = models.CharField(max_length=255)
+    apiURI = models.CharField(max_length=255)
+    apiMethod = models.CharField(max_length=255)
+    case = models.ForeignKey(Test_case, on_delete=False)
