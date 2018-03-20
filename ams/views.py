@@ -490,6 +490,67 @@ def to_add_case_item(request):
 
     return render(request, 'add_case_item.html', data)
 
+
+def save_case_item(request):
+    print('save_case_item request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
+    projectId = request.POST.get('projectId', None)
+    protocol = request.POST['protocol']
+    method = request.POST['method']
+    uri = request.POST['uri']
+    name = request.POST['name']
+    headers_str = request.POST['headers']
+    params_str = request.POST['params']
+    request_type = request.POST['requestType']
+    apiSuccessMock = request.POST['apiSuccessMock']
+    apiFailureMock = request.POST['apiFailureMock']
+
+    result = {}
+    try:
+        with transaction.atomic():
+            api = Api(id=id, apiName=name, apiURI=uri, apiProtocol=protocol, apiMethod=method)
+            api.project_id = projectId
+            api.apiRequestParamType = request_type
+            api.apiSuccessMock = apiSuccessMock
+            api.apiFailureMock = apiFailureMock
+            api.createTime = datetime.datetime.now()
+            api.updateUser = User(id=request.session['user']['id'])
+            if request_type == 'raw':
+                api.apiRequestRaw = params_str
+            api.save()
+            result['id'] = api.id
+            print('api.id====================', api.id)
+
+            # 如果是修改操作，则先删除历史数据
+            if id is not None:
+                Api_header.objects.filter(apiID=id).delete()
+                Api_request_param.objects.filter(apiID=id).delete()
+
+            headers = json.loads(headers_str)
+            for k, v in headers.items():
+                api_header = Api_header(headerName=k, headerValue=v, apiID=api.id)
+                api_header.save()
+
+            # a = 1 / 0
+
+            if request_type == 'formData':
+                params = json.loads(params_str)
+                for k, v in params.items():
+                    api_request_param = Api_request_param(paramName=k, paramValue=v, apiID=api.id)
+                    api_request_param.save()
+
+        result['success'] = True
+    except Exception as e:
+        result['success'] = False
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+
+
+
 # ######################################################################################################
 ######################################################test##########################################################
 def add(request):
