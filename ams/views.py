@@ -175,11 +175,12 @@ def api_list(request):
     # print('updateUser===========', updateUser.userName)
 
     plist = Project.objects.all().values('id', 'projectName')
+    data['project_list'] = plist
 
     data['api_list'] = api_list
     data['total_count'] = len(api_list)
     data['q'] = q
-    data['project_list'] = plist
+
     return render(request, 'api_list.html', data)
 
 
@@ -455,7 +456,6 @@ def case_detail(request):
     item_list = Test_case_item.objects.filter(case=Test_case(id=id))
     data['item_list'] = item_list
 
-
     return render(request, 'case_detail.html', data)
 
 
@@ -476,79 +476,120 @@ def del_case(request):
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
 
-def to_add_case_item(request):
-    caseId = request.GET['caseId']
-    print('to_add_case_item caseId={}'.format(caseId))
 
-    data = {'caseId':caseId}
-    # case = Test_case.objects.get(id=id)
-    # data['case'] = case
-    #
-    # item_list = Test_case_item.objects.filter(case=Test_case(id=id))
-    # data['item_list'] = item_list
-
-
-    return render(request, 'add_case_item.html', data)
-
-
-def save_case_item(request):
-    print('save_case_item request param={}'.format(request.POST))
-    id = request.POST.get('id', None)
-    projectId = request.POST.get('projectId', None)
-    protocol = request.POST['protocol']
-    method = request.POST['method']
-    uri = request.POST['uri']
-    name = request.POST['name']
-    headers_str = request.POST['headers']
-    params_str = request.POST['params']
-    request_type = request.POST['requestType']
-    apiSuccessMock = request.POST['apiSuccessMock']
-    apiFailureMock = request.POST['apiFailureMock']
+def del_case_item(request):
+    id = request.POST['id']
+    print('del_case_item item_id={}'.format(id))
 
     result = {}
     try:
         with transaction.atomic():
-            api = Api(id=id, apiName=name, apiURI=uri, apiProtocol=protocol, apiMethod=method)
-            api.project_id = projectId
-            api.apiRequestParamType = request_type
-            api.apiSuccessMock = apiSuccessMock
-            api.apiFailureMock = apiFailureMock
-            api.createTime = datetime.datetime.now()
-            api.updateUser = User(id=request.session['user']['id'])
-            if request_type == 'raw':
-                api.apiRequestRaw = params_str
-            api.save()
-            result['id'] = api.id
-            print('api.id====================', api.id)
-
-            # 如果是修改操作，则先删除历史数据
-            if id is not None:
-                Api_header.objects.filter(apiID=id).delete()
-                Api_request_param.objects.filter(apiID=id).delete()
-
-            headers = json.loads(headers_str)
-            for k, v in headers.items():
-                api_header = Api_header(headerName=k, headerValue=v, apiID=api.id)
-                api_header.save()
-
-            # a = 1 / 0
-
-            if request_type == 'formData':
-                params = json.loads(params_str)
-                for k, v in params.items():
-                    api_request_param = Api_request_param(paramName=k, paramValue=v, apiID=api.id)
-                    api_request_param.save()
-
-        result['success'] = True
+            Test_case_item.objects.filter(id=id).delete()
+        result['code'] = '0000'
     except Exception as e:
-        result['success'] = False
+        result['code'] = '1001'
+        result['msg'] = str(e)
         traceback.print_exc()
 
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+def to_add_case_item(request):
+    caseId = request.GET['caseId']
+    print('to_add_case_item caseId={}'.format(caseId))
 
+    data = {'caseId': caseId}
+    # case = Test_case.objects.get(id=id)
+    # data['case'] = case
+    #
+    # item_list = Test_case_item.objects.filter(case=Test_case(id=id))
+    # data['item_list'] = item_list
+
+    plist = Project.objects.all().values('id', 'projectName')
+    data['project_list'] = plist
+
+    return render(request, 'add_case_item.html', data)
+
+
+def to_edit_case_item(request):
+    itemId = request.GET['itemId']
+    print('to_edit_case_item itemId={}'.format(itemId))
+
+    case_item = Test_case_item.objects.get(id=itemId)
+    data = {'case_item': case_item}
+    data['caseId'] = case_item.case.id
+
+    # 请求头
+    caseData = json.loads(case_item.caseData)
+    header_list = caseData['headers']
+    data['header_list'] = header_list
+
+    # 请求参数
+    requestType = caseData['requestType']
+    data['requestType'] = requestType
+    if requestType == 'raw':
+        data['raw'] = caseData['raw']
+    data['request_param_list'] = caseData['params']
+
+    # 校验规则
+    data['match_rule_list'] = []
+    if case_item.matchType == 3:
+        data['match_rule_list'] = json.loads(case_item.matchRule)
+
+    plist = Project.objects.all().values('id', 'projectName')
+    data['project_list'] = plist
+
+    print('data={}'.format(data))
+    return render(request, 'edit_case_item.html', data)
+
+
+def save_case_item(request):
+    print('save_case_item request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
+    caseId = request.POST.get('caseId', None)
+    apiProtocol = request.POST['apiProtocol']
+    apiMethod = request.POST['apiMethod']
+    apiUri = request.POST['apiUri']
+    apiName = request.POST['apiName']
+    headers_str = request.POST['headers']
+    request_type = request.POST['requestType']
+    matchType = request.POST['matchType']
+    statusCode = request.POST['statusCode']
+    matchRule = request.POST.get('matchRule', '')
+
+    result = {}
+    try:
+        caseData = {}
+        caseData['headers'] = json.loads(headers_str)
+        caseData['apiUri'] = apiUri
+        caseData['apiProtocol'] = apiProtocol
+        caseData['apiMethod'] = apiMethod
+        caseData['requestType'] = request_type
+        if request_type == 'raw':
+            caseData['raw'] = request.POST['raw']
+            caseData['params'] = []
+        else:
+            caseData['params'] = json.loads(request.POST['params'])
+
+        with transaction.atomic():
+            case_item = Test_case_item(id=id, apiName=apiName, apiUri=apiUri, apiProtocol=apiProtocol)
+            case_item.case = Test_case(id=caseId)
+            case_item.apiMethod = apiMethod
+            case_item.matchType = matchType
+            case_item.statusCode = statusCode
+            case_item.caseData = json.dumps(caseData)
+            case_item.matchRule = matchRule
+            case_item.save()
+
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        result['msg'] = str(e)
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
 
 
 # ######################################################################################################

@@ -73,7 +73,6 @@
                 </div>
             </div>
 
-
             <table id="headerTable" class="table table-striped">
                 <thead>
                 <tr>
@@ -84,40 +83,24 @@
                 </tr>
                 </thead>
                 <tbody>
-                {% for header in header_list %}
+                {% for item in item_list %}
                     <tr>
                         <td>{{ forloop.counter }}</td>
-                        <td>{{ header.headerName }}</td>
-                        <td>{{ header.headerValue }}</td>
+                        <td>{{ item.apiName }}</td>
+                        <td>{{ item.apiUri }}</td>
                         <td>
-                            <button title="详情" type="button" class="btn btn-default btn-sm"
-                                    onclick="to_case_detail({{ case.id }})">
-                                <span class="glyphicon glyphicon-eye-open"></span>
-                            </button>
-                            <button title="修改" type="button" class="btn btn-default btn-sm"
-                                    onclick="openCaseModal({{ case.id }}, {{ case.group.id }}, '{{ case.caseName }}')">
+                            <button title="修改" type="button" class="btn btn-default btn-sm" onclick="to_edit_case_item({{ item.id }})">
                                 <span class="glyphicon glyphicon-edit"></span>
                             </button>
                             <button title="删除" type="button" class="btn btn-default btn-sm"
-                                    onclick="delCase(this, {{ case.id }})">
+                                    onclick="delCaseItem(this, {{ item.id }})">
                                 <span class="glyphicon glyphicon-trash"></span>
                             </button>
                         </td>
                     </tr>
                 {% endfor %}
-                <tr>
-                        <td>111</td>
-                        <td>111</td>
-                        <td>111</td>
-                        <td>111</td>
-                    </tr>
                 </tbody>
             </table>
-
-
-
-
-
         </div>
     </div>
 </div>
@@ -130,9 +113,22 @@
     function to_add_case_item(caseId) {
         window.location.href = '/to_add_case_item/?caseId='+caseId;
     }
-    function to_edit_api(apiId) {
-        window.location.href = '/edit_api/?apiId='+apiId;
+    function to_edit_case_item(itemId) {
+        window.location.href = '/to_edit_case_item/?itemId='+itemId;
     }
+    function delCaseItem(dom, itemId) {
+        if (!confirm('确定删除该接口吗？')) {
+            return false;
+        }
+        $.post('/del_case_item/', {id: itemId}, function (json) {
+            if (json.code === '0000') {
+                window.location.href = '/case_detail/?id={{ case.id }}';
+            } else {
+                alert(json.msg);
+            }
+        });
+    }
+
     function changeMethod(dom) {
         var rawBut = $('#rawBut');
         if($(dom).val() === 'POST'){

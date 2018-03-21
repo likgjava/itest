@@ -48,6 +48,9 @@ urlpatterns = [
     path('case_detail/', views.case_detail),
     path('del_case/', views.del_case),
     path('to_add_case_item/', views.to_add_case_item),
+    path('save_case_item/', views.save_case_item),
+    path('to_edit_case_item/', views.to_edit_case_item),
+    path('del_case_item/', views.del_case_item),
 
     path('test/add/', views.add),
     path('add2/<int:a>/<int:b>/', views.add2),

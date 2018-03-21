@@ -216,15 +216,16 @@
 
 <script type="text/javascript">
     function delCase(dom, id) {
-        if (confirm('确定删除该用例吗？')) {
-            $.post('/del_case/', {id: id}, function (json) {
-                if (json.code === '0000') {
-                    window.location.href = '/case_list/?group_id={{ group_id }}';
-                } else {
-                    alert(json.msg);
-                }
-            });
+        if (!confirm('确定删除该用例吗？')) {
+            return false;
         }
+        $.post('/del_case/', {id: id}, function (json) {
+            if (json.code === '0000') {
+                window.location.href = '/case_list/?group_id={{ group_id }}';
+            } else {
+                alert(json.msg);
+            }
+        });
     }
 
     function openGroupModal(id, name, version) {
