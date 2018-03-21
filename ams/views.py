@@ -208,8 +208,9 @@ def del_api_group(request):
 
 def api_list(request):
     q = request.POST.get('q', '')
+    group_id = request.GET.get('group_id', '')
     project_id = request.session['pid']
-    print('api_list q={} projectId={}'.format(q, project_id))
+    print('api_list q={} projectId={} group_id={}'.format(q, project_id, group_id))
 
     user = request.session['user']
     print('user type======', type(user))
@@ -219,14 +220,14 @@ def api_list(request):
     group_list = Api_group.objects.filter(project=Project(id=project_id))
     data['group_list'] = group_list
 
-    query = Api.objects
+    query = Api.objects.filter(project_id=project_id)
     if q != '':
         query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
-    if project_id != '':
-        query = query.filter(project_id=project_id)
-        data['project_id'] = int(project_id)
+    if group_id:
+        query = query.filter(group=Api_group(id=group_id))
+        data['group_id'] = int(group_id)
     api_list = query.order_by('-createTime')
-    print('api_list======', api_list)
+    data['api_list'] = api_list
 
     # updateUser = api_list[0].updateUser
     # print('updateUser===========', updateUser.userName)
@@ -234,7 +235,6 @@ def api_list(request):
     plist = Project.objects.all().values('id', 'projectName')
     data['project_list'] = plist
 
-    data['api_list'] = api_list
     data['total_count'] = len(api_list)
     data['q'] = q
 
@@ -307,19 +307,23 @@ def edit_api(request):
     plist = Project.objects.all().values('id', 'projectName')
     data['project_list'] = plist
 
+    data['group_list'] = Api_group.objects.all()
+
     return render(request, 'edit_api.html', data)
 
 
 def add_api(request):
     plist = Project.objects.all().values('id', 'projectName')
     data = {'project_list': plist}
+    data['group_list'] = Api_group.objects.all()
     return render(request, 'add_api.html', data)
 
 
 def save_api(request):
     print('save_api request param={}'.format(request.POST))
     id = request.POST.get('id', None)
-    projectId = request.POST.get('projectId', None)
+    projectId = request.session['pid']
+    groupId = request.POST['groupId']
     protocol = request.POST['protocol']
     method = request.POST['method']
     uri = request.POST['uri']
@@ -340,6 +344,7 @@ def save_api(request):
             api.apiFailureMock = apiFailureMock
             api.createTime = datetime.datetime.now()
             api.updateUser = User(id=request.session['user']['id'])
+            api.group = Api_group(id=groupId)
             if request_type == 'raw':
                 api.apiRequestRaw = params_str
             api.save()
@@ -422,6 +427,24 @@ def send_request(request):
 
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def select_api_list(request):
+    print('select_api_list request param={}'.format(request.POST))
+
+    data = {}
+    try:
+        pid = request.session['pid']
+        group_list = Api_group.objects.filter(project=Project(id=pid))
+        data['group_list'] = group_list
+
+        api_list = Api.objects.all()
+        data['api_list'] = api_list
+
+    except Exception as e:
+        traceback.print_exc()
+
+    return render(request, 'select_api_list.html', data)
 
 
 # ######################################################################################################

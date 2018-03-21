@@ -75,11 +75,11 @@
 
                     <form id="defaultForm" class="form-horizontal" role="form">
                         <div class="form-group">
-                            <label for="projectId" class="col-sm-2 control-label">所属项目：</label>
+                            <label for="groupId" class="col-sm-2 control-label">分组：</label>
                             <div class="col-sm-2">
-                                <select class="form-control" id="projectId">
-                                    {% for project in project_list %}
-                                    <option value="{{ project.id }}">{{ project.projectName }}</option>
+                                <select class="form-control" id="groupId">
+                                    {% for group in group_list %}
+                                    <option value="{{ group.id }}">{{ group.groupName }}</option>
                                     {% endfor %}
                                 </select>
                             </div>
@@ -335,7 +335,7 @@
         }
 
         var data = {};
-        data['projectId'] = $('#projectId').val();
+        data['groupId'] = $('#groupId').val();
         data['protocol'] = $('#protocol').val();
         data['method'] = $('#method').val();
         data['name'] = $('#name').val();

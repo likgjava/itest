@@ -39,6 +39,7 @@ urlpatterns = [
     path('edit_api/', views.edit_api),
     path('api_detail/', views.api_detail),
     path('api_test/', views.api_test),
+    path('select_api_list/', views.select_api_list),
 
     path('project_list/', views.project_list),
     path('project_info/', views.project_info),

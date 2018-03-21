@@ -66,7 +66,7 @@
                 <div class="navbar-header">
                     <button type="button" class="btn btn-default" onclick="to_case_list()">&lt;用例列表</button>
                     &nbsp;&nbsp;
-                    <button type="button" class="btn btn-success" onclick="to_edit_api({{ api.id }})">+ 已有接口</button>
+                    <button type="button" class="btn btn-success" onclick="openSelectApiListModal()">+ 已有接口</button>
                     <button type="button" class="btn btn-success" onclick="to_add_case_item({{ case.id }})">+ 空白接口</button>
                 </div>
                 <div class="nav navbar-nav navbar-right">
@@ -105,6 +105,12 @@
     </div>
 </div>
 
+<!-- 分组列表 -->
+<div class="modal fade" id="selectApiListModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" style="width: 800px;">
+        <div class="modal-content"></div>
+    </div>
+</div>
 
 <script type="text/javascript">
     function to_case_list() {
@@ -128,6 +134,13 @@
             }
         });
     }
+    function openSelectApiListModal() {
+        $("#selectApiListModal").modal({
+            remote: "/select_api_list"
+        });
+    }
+
+
 
     function changeMethod(dom) {
         var rawBut = $('#rawBut');

@@ -84,9 +84,9 @@
                             <b>分组</b>
                             <a class="badge" onclick="openGroupListModal()">管理</a>
                         </li>
-                        <a href="/case_list/" class="list-group-item {% if not group_id %}active{% endif %}">所有接口</a>
+                        <a href="/api_list/" class="list-group-item {% if not group_id %}active{% endif %}">所有接口</a>
                         {% for group in group_list %}
-                            <a href="/case_list/?group_id={{ group.id }}"
+                            <a href="/api_list/?group_id={{ group.id }}"
                                class="list-group-item {% ifequal group_id group.id %}active{% endifequal %}">{{ group.groupName }}</a>
                         {% endfor %}
                     </ul>
@@ -96,7 +96,7 @@
 
                     <div class="container-fluid navbar-default" style="padding-left: 0; margin-bottom: 10px;">
                         <div class="navbar-header form-inline">
-                            <form action="/api_list/" method="post">
+                            <form action="/api_list/?group_id={{ group_id }}" method="post">
                                 <button type="button" class="btn btn-success" onclick="to_add_api()">+ 添加接口</button>
                                 <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="搜索接口">
                                 <button type="submit" class="btn btn-default">搜索</button>
