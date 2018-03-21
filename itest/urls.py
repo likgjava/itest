@@ -28,6 +28,9 @@ urlpatterns = [
     path('check_user_name_exist/', views.check_user_name_exist),
     path('to_register/', views.to_register),
 
+    path('save_api_group/', views.save_api_group),
+    path('api_group_list/', views.api_group_list),
+    path('del_api_group/', views.del_api_group),
     path('add_api/', views.add_api),
     path('send_request/', views.send_request),
     path('save_api/', views.save_api),
@@ -42,10 +45,10 @@ urlpatterns = [
     path('save_project/', views.save_project),
     path('del_project/', views.del_project),
 
-    path('case_list/', views.case_list),
     path('save_group/', views.save_group),
     path('group_list/', views.group_list),
     path('del_group/', views.del_group),
+    path('case_list/', views.case_list),
     path('save_case/', views.save_case),
     path('case_detail/', views.case_detail),
     path('del_case/', views.del_case),

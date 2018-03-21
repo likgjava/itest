@@ -11,7 +11,8 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 
-from ams.models import Api, Api_header, Api_request_param, User, Project, Test_case_group, Test_case, Test_case_item
+from ams.models import Api, Api_header, Api_request_param, User, Project, Test_case_group, Test_case, Test_case_item, \
+    Api_group
 
 
 def to_login(request):
@@ -152,6 +153,59 @@ def del_project(request):
 
 # ######################################################################################################
 # ####################################### api ##########################################################
+def save_api_group(request):
+    print('save_api_group request param={}'.format(request.POST))
+    id = request.POST.get('id', None)
+    groupName = request.POST['groupName']
+
+    result = {}
+    try:
+        pid = request.session['pid']
+        project = Project(id=pid)
+        group = Api_group(id=id, groupName=groupName, project=project)
+        group.save()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def api_group_list(request):
+    print('api_group_list request param={}'.format(request.POST))
+
+    data = {}
+    try:
+        pid = request.session['pid']
+        project = Project(id=pid)
+        group_list = Api_group.objects.filter(project=project)
+        data['group_list'] = group_list
+    except Exception as e:
+        traceback.print_exc()
+
+    return render(request, 'api_group_list.html', data)
+
+
+def del_api_group(request):
+    id = request.POST['id']
+    print('del_api_group id={}'.format(id))
+
+    result = {}
+    try:
+        with transaction.atomic():
+            Api_group.objects.filter(id=id).delete()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        result['msg'] = str(e)
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
 def api_list(request):
     q = request.POST.get('q', '')
     project_id = request.session['pid']
@@ -160,7 +214,11 @@ def api_list(request):
     user = request.session['user']
     print('user type======', type(user))
 
+    # 获取分组数据
     data = {}
+    group_list = Api_group.objects.filter(project=Project(id=project_id))
+    data['group_list'] = group_list
+
     query = Api.objects
     if q != '':
         query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
@@ -368,40 +426,6 @@ def send_request(request):
 
 # ######################################################################################################
 # ####################################### test_case ####################################################
-def case_list(request):
-    q = request.POST.get('q', '')
-    group_id = request.GET.get('group_id', None)
-    project_id = request.session['pid']
-    print('case_list q={} group_id={}'.format(q, group_id))
-
-    user = request.session['user']
-    print('user type======', type(user))
-
-    # 获取分组数据
-    data = {}
-    group_list = Test_case_group.objects.filter(project=Project(id=project_id))
-    data['group_list'] = group_list
-
-    query = Test_case.objects
-    if q != '':
-        query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
-    if group_id:
-        query = query.filter(group=Test_case_group(id=group_id))
-        data['group_id'] = int(group_id)
-    case_list = query.order_by('-createTime')
-    print('case_list======', case_list)
-
-    # updateUser = api_list[0].updateUser
-    # print('updateUser===========', updateUser.userName)
-
-    plist = Project.objects.all().values('id', 'projectName')
-
-    data['case_list'] = case_list
-    data['q'] = q
-    data['project_list'] = plist
-    return render(request, 'case_list.html', data)
-
-
 def save_group(request):
     print('save_group request param={}'.format(request.POST))
     id = request.POST.get('id', None)
@@ -453,6 +477,40 @@ def del_group(request):
 
     print('result={}'.format(result))
     return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def case_list(request):
+    q = request.POST.get('q', '')
+    group_id = request.GET.get('group_id', None)
+    project_id = request.session['pid']
+    print('case_list q={} group_id={}'.format(q, group_id))
+
+    user = request.session['user']
+    print('user type======', type(user))
+
+    # 获取分组数据
+    data = {}
+    group_list = Test_case_group.objects.filter(project=Project(id=project_id))
+    data['group_list'] = group_list
+
+    query = Test_case.objects
+    if q != '':
+        query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
+    if group_id:
+        query = query.filter(group=Test_case_group(id=group_id))
+        data['group_id'] = int(group_id)
+    case_list = query.order_by('-createTime')
+    print('case_list======', case_list)
+
+    # updateUser = api_list[0].updateUser
+    # print('updateUser===========', updateUser.userName)
+
+    plist = Project.objects.all().values('id', 'projectName')
+
+    data['case_list'] = case_list
+    data['q'] = q
+    data['project_list'] = plist
+    return render(request, 'case_list.html', data)
 
 
 def save_case(request):

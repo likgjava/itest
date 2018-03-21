@@ -15,6 +15,11 @@ class Project(models.Model):
     projectVersion = models.CharField(max_length=6)
 
 
+class Api_group(models.Model):
+    groupName = models.CharField(max_length=255)
+    project = models.ForeignKey(Project, on_delete=False)
+
+
 class Api(models.Model):
     apiName = models.CharField(max_length=255)
     apiURI = models.CharField(max_length=255)
@@ -29,6 +34,7 @@ class Api(models.Model):
     # updateUser = models.ForeignKey(User, on_delete=False, db_column='updateUserID')
     updateUser = models.ForeignKey(User, on_delete=False)
     project = models.ForeignKey(Project, on_delete=False)
+    group = models.ForeignKey(Api_group, on_delete=False)
     createTime = models.DateTimeField(auto_now_add=False)
 
 
