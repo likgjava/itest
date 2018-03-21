@@ -87,7 +87,7 @@
             $.post($form.attr('action'), $form.serialize(), function(result) {
                 console.log(result);
                 if(result.code === '0000'){
-                    window.location.href = '/api_list/'
+                    window.location.href = '/'
                 }else{
                     alert(result.msg);
                 }

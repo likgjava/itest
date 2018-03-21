@@ -11,7 +11,6 @@ from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 
-# Create your views here.
 from ams.models import Api, Api_header, Api_request_param, User, Project, Test_case_group, Test_case, Test_case_item
 
 
@@ -155,7 +154,7 @@ def del_project(request):
 # ####################################### api ##########################################################
 def api_list(request):
     q = request.POST.get('q', '')
-    project_id = request.POST.get('projectId', '')
+    project_id = request.session['pid']
     print('api_list q={} projectId={}'.format(q, project_id))
 
     user = request.session['user']
@@ -372,7 +371,7 @@ def send_request(request):
 def case_list(request):
     q = request.POST.get('q', '')
     group_id = request.GET.get('group_id', None)
-    project_id = request.POST.get('projectId', '')
+    project_id = request.session['pid']
     print('case_list q={} group_id={}'.format(q, group_id))
 
     user = request.session['user']
@@ -380,7 +379,7 @@ def case_list(request):
 
     # 获取分组数据
     data = {}
-    group_list = Test_case_group.objects.all()
+    group_list = Test_case_group.objects.filter(project=Project(id=project_id))
     data['group_list'] = group_list
 
     query = Test_case.objects
@@ -417,6 +416,39 @@ def save_group(request):
         result['code'] = '0000'
     except Exception as e:
         result['code'] = '1001'
+        traceback.print_exc()
+
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def group_list(request):
+    print('group_list request param={}'.format(request.POST))
+
+    data = {}
+    try:
+        pid = request.session['pid']
+        project = Project(id=pid)
+        group_list = Test_case_group.objects.filter(project=project)
+        data['group_list'] = group_list
+    except Exception as e:
+        traceback.print_exc()
+
+    return render(request, 'group_list.html', data)
+
+
+def del_group(request):
+    id = request.POST['id']
+    print('del_group id={}'.format(id))
+
+    result = {}
+    try:
+        with transaction.atomic():
+            Test_case_group.objects.filter(id=id).delete()
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        result['msg'] = str(e)
         traceback.print_exc()
 
     print('result={}'.format(result))

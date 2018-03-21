@@ -70,12 +70,6 @@
                 <div class="navbar-header form-inline">
                     <form action="/api_list/" method="post">
                         <button type="button" class="btn btn-success" onclick="to_add_api()">+ 添加接口</button>
-                        <select class="form-control" name="projectId">
-                            <option value="">选择项目</option>
-                            {% for project in project_list %}
-                                <option value="{{ project.id }}" {% ifequal project_id project.id %}selected{% endifequal %}>{{ project.projectName }}</option>
-                            {% endfor %}
-                        </select>
                         <input type="text" class="form-control" name="q" value="{{ q }}" placeholder="搜索接口">
                         <button type="submit" class="btn btn-default">搜索</button>
                     </form>

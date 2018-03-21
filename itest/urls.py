@@ -44,6 +44,8 @@ urlpatterns = [
 
     path('case_list/', views.case_list),
     path('save_group/', views.save_group),
+    path('group_list/', views.group_list),
+    path('del_group/', views.del_group),
     path('save_case/', views.save_case),
     path('case_detail/', views.case_detail),
     path('del_case/', views.del_case),

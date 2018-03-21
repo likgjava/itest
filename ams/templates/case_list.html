@@ -80,18 +80,16 @@
             <div class="row">
                 <div class="col-sm-3 col-md-2">
                     <button type="button" class="btn btn-success" onclick="openGroupModal()">+ 新建分组</button>
-
                     <ul class="list-group" style="margin-top: 10px">
                         <li class="list-group-item">
                             <b>分组</b>
-                            <a class="badge">管理</a>
+                            <a class="badge" onclick="openGroupListModal()">管理</a>
                         </li>
-                        <a href="/case_list/" class="list-group-item {% if not group_id %}active{% endif %}">所有用例{{ group_id }}</a>
+                        <a href="/case_list/" class="list-group-item {% if not group_id %}active{% endif %}">所有用例</a>
                         {% for group in group_list %}
                             <a href="/case_list/?group_id={{ group.id }}" class="list-group-item {% ifequal group_id group.id %}active{% endifequal %}">{{ group.groupName }}</a>
                         {% endfor %}
                     </ul>
-
                 </div>
 
                 <div class="col-sm-9 col-md-10">
@@ -139,18 +137,14 @@
                             </tbody>
                         </table>
                     </div>
-
-
                 </div>
             </div>
-
-
         </div>
     </div>
 </div>
 
 
-<!-- 模态框（Modal） -->
+<!-- 新增分组 -->
 <div class="modal fade" id="groupModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -175,6 +169,12 @@
                 <button type="button" class="btn btn-primary" onclick="save_group()">提交</button>
             </div>
         </div>
+    </div>
+</div>
+<!-- 分组列表 -->
+<div class="modal fade" id="groupListModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content"></div>
     </div>
 </div>
 <div class="modal fade" id="caseModal" tabindex="-1" role="dialog" aria-labelledby="caseModalLabel" aria-hidden="true">
@@ -228,19 +228,14 @@
         });
     }
 
-    function openGroupModal(id, name, version) {
+    function openGroupModal() {
         $('#groupForm')[0].reset();
-        //修改
-        if(id){
-            $('#myModalLabel').html('修改项目');
-            $('#projectId').val(id);
-            $('#projectName').val(name);
-            $('#projectVersion').val(version);
-
-        }else{
-            $('#myModalLabel').html('新增分组');
-        }
         $('#groupModal').modal('show');
+    }
+    function openGroupListModal() {
+        $("#groupListModal").modal({
+            remote: "/group_list"
+        });
     }
     function openCaseModal(id, groupId, name) {
         $('#caseForm')[0].reset();
@@ -265,9 +260,6 @@
         }
 
         var data = {};
-        if($('#projectId').val() !== ''){
-            data['id'] = $('#projectId').val();
-        }
         data['groupName'] = $('#groupName').val();
         $.post('/save_group/', data, function (json) {
             if(json.code === '0000'){
@@ -275,6 +267,35 @@
                 $('#groupModal').modal('hide');
                 window.location.href = '/case_list/';
             }else{
+                alert(json.msg);
+            }
+        });
+    }
+    function updateGroup(dom, groupId) {
+        var groupName = $(dom).parent().parent().find('input[name=groupName]').val();
+        if(groupName === ''){
+            alert('请填写分组名称！');
+            return false;
+        }
+
+        $.post('/save_group/', {id:groupId, groupName:groupName}, function (json) {
+            if(json.code === '0000'){
+                isGroupUpdated = true;
+                alert('修改成功');
+            }else{
+                alert(json.msg);
+            }
+        });
+    }
+    function delGroup(dom, groupId) {
+        if (!confirm('确定删除该分组吗？')) {
+            return false;
+        }
+        $.post('/del_group/', {id: groupId}, function (json) {
+            if (json.code === '0000') {
+                $(dom).parent().parent().remove();
+                isGroupUpdated = true;
+            } else {
                 alert(json.msg);
             }
         });
@@ -323,9 +344,17 @@
     }
 
 
-
+    //分组修改标记
+    var isGroupUpdated = false;
     $(document).ready(function () {
         activeMenu('/case_list');
+
+        $("#groupListModal").on("hidden.bs.modal", function () {
+            $(this).removeData("bs.modal");
+            if(isGroupUpdated){
+                window.location.href = '/case_list';
+            }
+        });
 
         $('input[name=headerLabel]').bsSuggest(headerLabelData);
 
