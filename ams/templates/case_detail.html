@@ -78,7 +78,9 @@
                 <tr>
                     <th>顺序</th>
                     <th>接口名称</th>
+                    <th>请求方式</th>
                     <th>URI</th>
+                    <th>测试结果</th>
                     <th>操作</th>
                 </tr>
                 </thead>
@@ -87,8 +89,13 @@
                     <tr>
                         <td>{{ forloop.counter }}</td>
                         <td>{{ item.apiName }}</td>
+                        <td><span class="label label-success">{{ item.apiMethod }}</span></td>
                         <td>{{ item.apiUri }}</td>
+                        <td>尚无测试结果</td>
                         <td>
+                            <button title="测试" type="button" class="btn btn-default btn-sm" onclick="auto_test({{ item.id }})">
+                                <span class="glyphicon glyphicon-flash"></span>
+                            </button>
                             <button title="修改" type="button" class="btn btn-default btn-sm" onclick="to_edit_case_item({{ item.id }})">
                                 <span class="glyphicon glyphicon-edit"></span>
                             </button>
@@ -151,6 +158,11 @@
         $("#selectApiListDiv").load(url);
     }
 
+    function auto_test(itemId) {
+        $.post('/auto_test/?itemId='+itemId, function (json) {
+            alert(JSON.stringify(json))
+        });
+    }
 
 
     function changeMethod(dom) {

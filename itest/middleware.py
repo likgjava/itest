@@ -26,11 +26,12 @@ class ExteriorAuthMiddleware(MiddlewareMixin):
                 return HttpResponseRedirect('/to_login/')
         # 已登录
         else:
-            print('pid===================================', request.session['pid'])
+            pid = request.session.get('pid', None)
+            print('pid===================================', pid)
             # 如果是登录则转到首页
             if request.path in ['/', '/to_login/']:
                 return HttpResponseRedirect('/project_list/')
 
             # 如果还没有选择某个项目则只能进入‘项目管理’页面
-            if not request.session['pid'] and request.path not in ['/project_list/', '/project_info/', '/save_project/', '/del_project/']:
+            if not pid and request.path not in ['/project_list/', '/project_info/', '/save_project/', '/del_project/']:
                 return HttpResponseRedirect('/project_list/')

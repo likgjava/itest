@@ -195,6 +195,12 @@ def del_api_group(request):
     result = {}
     try:
         with transaction.atomic():
+            api_list = Api.objects.filter(group=Api_group(id=id))
+            for api in api_list:
+                api_id = api.id
+                Api.objects.filter(id=api_id).delete()
+                Api_header.objects.filter(apiID=api_id).delete()
+                Api_request_param.objects.filter(apiID=api_id).delete()
             Api_group.objects.filter(id=id).delete()
         result['code'] = '0000'
     except Exception as e:
@@ -495,6 +501,10 @@ def del_group(request):
     result = {}
     try:
         with transaction.atomic():
+            case_list = Test_case.objects.filter(group=Test_case_group(id=id))
+            for case in case_list:
+                Test_case_item.objects.filter(case=case).delete()
+                Test_case.objects.filter(id=case.id).delete()
             Test_case_group.objects.filter(id=id).delete()
         result['code'] = '0000'
     except Exception as e:
@@ -587,6 +597,7 @@ def del_case(request):
     result = {}
     try:
         with transaction.atomic():
+            Test_case_item.objects.filter(case=Test_case(id=case_id)).delete()
             Test_case.objects.filter(id=case_id).delete()
         result['code'] = '0000'
     except Exception as e:
@@ -719,15 +730,94 @@ def save_case_item(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+def auto_test(request):
+    print('auto_test request param={}'.format(request.GET))
+    id = request.POST.get('id', None)
+    caseId = request.POST.get('caseId', None)
+    itemId = request.GET['itemId']
+
+    result = {}
+    try:
+
+        case_item = Test_case_item.objects.get(id=itemId)
+        print('case_item.caseData================================================================', case_item.caseData)
+
+        # 构造请求头数据
+        headers = {}
+        caseData = json.loads(case_item.caseData)
+        header_list = caseData['headers']
+        for header in header_list:
+            headers[header['headerName']] = header['headerValue']
+
+        # 构造请求参数
+        params = {}
+        param_list = caseData['params']
+        for param in param_list:
+            params[param['paramName']] = param['paramValue']
+        requestType = caseData['requestType']
+
+        # 校验规则
+        # data['match_rule_list'] = []
+        # if case_item.matchType == 3:
+        #     data['match_rule_list'] = json.loads(case_item.matchRule)
+
+        url = case_item.apiProtocol + '://' + case_item.apiUri
+
+        global r
+        if case_item.apiMethod == 'GET':
+            r = requests.get(url, params=params, headers=headers)
+        elif case_item.apiMethod == 'POST':
+            if requestType == 'formData':
+                r = requests.post(url, params=params, headers=headers)
+            else:
+                r = requests.post(url, data=caseData['raw'], headers=headers)
+
+        test_result = _build_test_result(r, url, case_item)
+
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        result['msg'] = str(e)
+        traceback.print_exc()
+
+    print('result==============={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def _build_test_result(response, url, case_item):
+    print('status============', response.status_code)
+    result = {}
+    result['url'] = url
+    result['apiMethod'] = case_item.apiMethod
+    result['statusCode'] = response.status_code
+
+    result['body'] = html.escape(r.content.decode())
+    result_headers = {}
+    for k, v in r.headers.items():
+        result_headers[k] = v
+    result['headers'] = result_headers
+
+    pass
+
+
 # ######################################################################################################
-######################################################test##########################################################
+# #################################################### test ############################################
 def add(request):
     print('add================{}'.format(request.GET))
-    # aa = request.GET['aa']
-    # print('aa======={}'.format(aa))
     a = request.GET['a']
     b = request.GET['b']
     c = int(a) + int(b)
+
+    result = {'sum': c}
+    print('result={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
+def sub(request):
+    print('sub================{}'.format(request.GET))
+    a = request.GET['a']
+    b = request.GET['b']
+    c = int(a) - int(b)
     return HttpResponse(str(c))
 
 

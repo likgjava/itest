@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50018
 File Encoding         : 65001
 
-Date: 2018-03-21 23:08:12
+Date: 2018-03-22 18:08:16
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -41,21 +41,10 @@ CREATE TABLE `ams_api` (
 -- ----------------------------
 -- Records of ams_api
 -- ----------------------------
-INSERT INTO `ams_api` VALUES ('19', '获取用户信息', 'www.baidu.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '1', '0', '2018-03-14 10:15:41', null);
-INSERT INTO `ams_api` VALUES ('21', '添加用户2', 'www.baidu.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '1', '0', '2018-03-14 10:48:49', null);
-INSERT INTO `ams_api` VALUES ('23', '添加用户4', 'www.baidu.com', 'HTTP', 'POST', 'formData', '', 0x4E6F6E65, 0x4E6F6E65, '0', '1', '1', '5', '2018-03-21 22:34:31', '2018-03-21 22:34:31');
-INSERT INTO `ams_api` VALUES ('25', 'aaaaaa', 'www.baidu.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '1', '0', '2018-03-14 13:39:10', '2018-03-14 13:39:10');
-INSERT INTO `ams_api` VALUES ('27', 'baidu2', 'www.baidu.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '1', '0', '2018-03-14 13:41:09', '2018-03-14 13:41:09');
-INSERT INTO `ams_api` VALUES ('28', 'baidu111', 'www.163.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '1', '0', '2018-03-14 13:46:50', '2018-03-14 13:46:50');
-INSERT INTO `ams_api` VALUES ('32', 'baidu111', 'www.163.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '1', '0', '2018-03-14 14:03:01', '2018-03-14 14:03:01');
-INSERT INTO `ams_api` VALUES ('34', 'baidu111', 'www.163.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '1', '0', '2018-03-14 14:05:21', '2018-03-14 14:05:21');
-INSERT INTO `ams_api` VALUES ('35', 'baidu111', 'www.163.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '2', '0', '2018-03-14 14:06:44', '2018-03-14 14:06:44');
-INSERT INTO `ams_api` VALUES ('36', 'baidu111222', 'www.163.com', 'HTTP', 'POST', 'formData', '', null, null, '0', null, '2', '0', '2018-03-14 14:13:11', '2018-03-14 14:13:11');
+INSERT INTO `ams_api` VALUES ('21', '两个数相加', 'localhost:8000/test/add?a=1&b=2', 'HTTP', 'GET', 'formData', '', 0x7B73756D3A337D, 0x4E6F6E65, '0', '1', '1', '4', '2018-03-22 14:46:35', '2018-03-22 14:46:35');
 INSERT INTO `ams_api` VALUES ('38', '阳光易购', 'www.ebid360.com', 'HTTP', 'POST', 'raw', 0x61616161616161616161616262626262626262626262626262626262626262626262, 0x616161616161616161616161, 0x7BE28098636F6465E280993A313131317D, '0', null, '2', '5', '2018-03-21 15:19:41', '2018-03-21 15:19:41');
-INSERT INTO `ams_api` VALUES ('39', 'fdsafdsafsadfdsaf', 'fdasfsadfsa', 'HTTP', 'POST', 'formData', '', '', '', '0', null, '2', '0', '2018-03-15 09:45:58', '2018-03-15 09:45:58');
 INSERT INTO `ams_api` VALUES ('40', 'aa', 'aa', 'HTTP', 'POST', 'formData', '', '', '', '0', null, '2', '3', '2018-03-16 14:16:32', '2018-03-16 14:16:32');
 INSERT INTO `ams_api` VALUES ('42', '加法接口测试', '127.0.0.1:8000/test/add/', 'HTTP', 'POST', 'formData', '', 0x33, '', '0', null, '2', '4', '2018-03-16 15:45:53', '2018-03-16 15:45:53');
-INSERT INTO `ams_api` VALUES ('43', 'aaa', 'aaa', 'HTTP', 'POST', 'formData', '', '', '', '0', '2', '1', '5', '2018-03-21 22:33:41', '2018-03-21 22:33:41');
 
 -- ----------------------------
 -- Table structure for ams_api_group
@@ -72,8 +61,8 @@ CREATE TABLE `ams_api_group` (
 -- ----------------------------
 -- Records of ams_api_group
 -- ----------------------------
-INSERT INTO `ams_api_group` VALUES ('1', '教师管理列表', '1');
-INSERT INTO `ams_api_group` VALUES ('2', '登录模块', '1');
+INSERT INTO `ams_api_group` VALUES ('1', '加法', '1');
+INSERT INTO `ams_api_group` VALUES ('3', '减法', '1');
 
 -- ----------------------------
 -- Table structure for ams_api_header
@@ -90,21 +79,10 @@ CREATE TABLE `ams_api_header` (
 -- ----------------------------
 -- Records of ams_api_header
 -- ----------------------------
-INSERT INTO `ams_api_header` VALUES ('15', 'a', 'b', '19');
-INSERT INTO `ams_api_header` VALUES ('17', 'a', 'b', '21');
-INSERT INTO `ams_api_header` VALUES ('21', 'a', 'b', '25');
-INSERT INTO `ams_api_header` VALUES ('23', 'a', 'b', '27');
-INSERT INTO `ams_api_header` VALUES ('24', 'a', 'b', '28');
-INSERT INTO `ams_api_header` VALUES ('28', 'a', 'b', '32');
-INSERT INTO `ams_api_header` VALUES ('30', 'a', 'b', '34');
-INSERT INTO `ams_api_header` VALUES ('31', 'a', 'b', '35');
-INSERT INTO `ams_api_header` VALUES ('32', 'a', 'b', '36');
-INSERT INTO `ams_api_header` VALUES ('36', 'Accept', 'aaa', '39');
 INSERT INTO `ams_api_header` VALUES ('37', 'a', 'a', '40');
 INSERT INTO `ams_api_header` VALUES ('39', 'area', '010', '38');
 INSERT INTO `ams_api_header` VALUES ('40', 'uid', '10001', '38');
-INSERT INTO `ams_api_header` VALUES ('41', '111', '1222', '43');
-INSERT INTO `ams_api_header` VALUES ('42', 'a', 'b', '23');
+INSERT INTO `ams_api_header` VALUES ('45', 'area', '010', '21');
 
 -- ----------------------------
 -- Table structure for ams_api_request_param
@@ -124,19 +102,10 @@ CREATE TABLE `ams_api_request_param` (
 -- ----------------------------
 -- Records of ams_api_request_param
 -- ----------------------------
-INSERT INTO `ams_api_request_param` VALUES ('11', 'cc', 'dd', '0', '19', '0');
-INSERT INTO `ams_api_request_param` VALUES ('13', 'cc', 'dd', '0', '21', '0');
-INSERT INTO `ams_api_request_param` VALUES ('17', 'cc', 'dd', '0', '25', '0');
-INSERT INTO `ams_api_request_param` VALUES ('19', 'cc', 'dd', '0', '27', '0');
-INSERT INTO `ams_api_request_param` VALUES ('20', 'cc', 'dd', '0', '28', '0');
-INSERT INTO `ams_api_request_param` VALUES ('21', 'cc', 'dd', '0', '32', '0');
-INSERT INTO `ams_api_request_param` VALUES ('23', 'cc', 'dd', '0', '34', '0');
-INSERT INTO `ams_api_request_param` VALUES ('24', 'cc', 'dd', '0', '35', '0');
-INSERT INTO `ams_api_request_param` VALUES ('25', 'cc', 'dd', '0', '36', '0');
-INSERT INTO `ams_api_request_param` VALUES ('26', 'a', '111', '0', '39', '0');
 INSERT INTO `ams_api_request_param` VALUES ('29', 'a', '1', '0', '42', '0');
 INSERT INTO `ams_api_request_param` VALUES ('30', 'b', '2', '0', '42', '0');
-INSERT INTO `ams_api_request_param` VALUES ('31', 'cc', 'dd', '0', '23', '0');
+INSERT INTO `ams_api_request_param` VALUES ('34', 'a', '1', '0', '21', '0');
+INSERT INTO `ams_api_request_param` VALUES ('35', 'b', '2', '0', '21', '0');
 
 -- ----------------------------
 -- Table structure for ams_api_result_param
@@ -189,7 +158,7 @@ CREATE TABLE `ams_project` (
 -- ----------------------------
 -- Records of ams_project
 -- ----------------------------
-INSERT INTO `ams_project` VALUES ('1', '0', '教师管理系统', '2018-03-21 14:29:45', '1.0');
+INSERT INTO `ams_project` VALUES ('1', '0', '测试系统', '2018-03-22 14:22:54', '1.0');
 INSERT INTO `ams_project` VALUES ('2', '0', '学生管理系统', '2018-03-21 15:21:50', '5.0');
 
 -- ----------------------------
@@ -213,10 +182,7 @@ CREATE TABLE `ams_test_case` (
 -- ----------------------------
 -- Records of ams_test_case
 -- ----------------------------
-INSERT INTO `ams_test_case` VALUES ('1', '1', '登录成功', null, null, null, '2018-03-21 17:16:45', '3', '0', null);
-INSERT INTO `ams_test_case` VALUES ('3', '1', 'cccc2222', null, null, null, '2018-03-21 17:23:45', '4', '0', null);
-INSERT INTO `ams_test_case` VALUES ('4', '2', 'dddd', null, null, null, '2018-03-20 14:29:45', '1', '0', null);
-INSERT INTO `ams_test_case` VALUES ('7', '1', '登录-用户名不存在', null, null, null, '2018-03-21 17:17:08', '3', '0', null);
+INSERT INTO `ams_test_case` VALUES ('8', '1', '单接口测试-加法', null, null, null, '2018-03-22 16:13:37', '3', '0', null);
 
 -- ----------------------------
 -- Table structure for ams_test_case_group
@@ -234,8 +200,7 @@ CREATE TABLE `ams_test_case_group` (
 -- ----------------------------
 INSERT INTO `ams_test_case_group` VALUES ('1', '范德萨', '2');
 INSERT INTO `ams_test_case_group` VALUES ('2', '登录模块', '2');
-INSERT INTO `ams_test_case_group` VALUES ('3', '教师登录', '1');
-INSERT INTO `ams_test_case_group` VALUES ('4', 'aaa', '1');
+INSERT INTO `ams_test_case_group` VALUES ('3', '加法测试用例', '1');
 
 -- ----------------------------
 -- Table structure for ams_test_case_item
@@ -259,8 +224,7 @@ CREATE TABLE `ams_test_case_item` (
 -- ----------------------------
 -- Records of ams_test_case_item
 -- ----------------------------
-INSERT INTO `ams_test_case_item` VALUES ('6', '1', '{\"headers\": [{\"headerName\": \"a1\", \"headerValue\": \"11\"}, {\"headerName\": \"fffffffff\", \"headerValue\": \"fffffffffff\"}], \"apiUri\": \"fdsfdsaf\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"POST\", \"requestType\": \"raw\", \"raw\": \"fdsafsafsaffaffffsaf\", \"params\": []}', null, '200', '3', '[{\"paramKey\":\"aaa\",\"matchRule\":\"0\",\"paramInfo\":\"dddd\"},{\"paramKey\":\"cc\",\"matchRule\":\"0\",\"paramInfo\":\"cc\"}]', '获取教师信息', 'fdsfdsaf', 'POST', 'HTTP');
-INSERT INTO `ams_test_case_item` VALUES ('7', '7', '{\"headers\": [], \"apiUri\": \"www.aaa.com/login\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"POST\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"username\", \"paramValue\": \"1\"}]}', null, '200', '0', '', '登录', 'www.aaa.com/login', 'POST', 'HTTP');
+INSERT INTO `ams_test_case_item` VALUES ('8', '8', '{\"headers\": [{\"headerName\": \"area\", \"headerValue\": \"010\"}], \"apiUri\": \"localhost:8000/test/add?a=1&b=2\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"GET\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"1\"}, {\"paramName\": \"b\", \"paramValue\": \"2\"}]}', null, '200', '1', '3', '两个数相加', 'localhost:8000/test/add?a=1&b=2', 'GET', 'HTTP');
 
 -- ----------------------------
 -- Table structure for ams_user
