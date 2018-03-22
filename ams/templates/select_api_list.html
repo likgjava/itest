@@ -6,9 +6,9 @@
     <div class="row" style="height:300px;overflow:auto; ">
 		<div class="col-md-3 column">
             <ul class="list-group" style="margin-top: 10px">
-                <a href="/api_list/" class="list-group-item {% if not group_id %}active{% endif %}">所有接口</a>
+                <a href="javascript:;" onclick="reloadSelectApiList()" class="list-group-item {% if not group_id %}active{% endif %}">所有接口</a>
                 {% for group in group_list %}
-                    <a href="/api_list/?group_id={{ group.id }}"
+                    <a href="javascript:;" onclick="reloadSelectApiList({{ group.id }})"
                        class="list-group-item {% ifequal group_id group.id %}active{% endifequal %}">{{ group.groupName }}</a>
                 {% endfor %}
             </ul>
@@ -21,6 +21,7 @@
                         <td>{{ api.apiName }}</td>
                         <td><span class="label label-success">{{ api.apiMethod }}</span></td>
                         <td>{{ api.apiURI }}</td>
+                        <td><button type="button" class="btn btn-primary" onclick="selectedApi({{ api.id }})">确认</button></td>
                     </tr>
                 {% endfor %}
                 </tbody>
@@ -31,5 +32,4 @@
 </div>
 <div class="modal-footer">
     <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
-    <button type="button" class="btn btn-primary" onclick="save_group()">确认</button>
 </div>

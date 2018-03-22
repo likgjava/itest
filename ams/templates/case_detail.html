@@ -108,7 +108,7 @@
 <!-- 分组列表 -->
 <div class="modal fade" id="selectApiListModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" style="width: 800px;">
-        <div class="modal-content"></div>
+        <div class="modal-content" id="selectApiListDiv"></div>
     </div>
 </div>
 
@@ -118,6 +118,10 @@
     }
     function to_add_case_item(caseId) {
         window.location.href = '/to_add_case_item/?caseId='+caseId;
+    }
+    function selectedApi(apiId) {
+        window.location.href = '/to_add_case_item/?caseId={{ case.id }}&apiId='+apiId;
+        $("#selectApiListModal").modal('hide');
     }
     function to_edit_case_item(itemId) {
         window.location.href = '/to_edit_case_item/?itemId='+itemId;
@@ -138,6 +142,13 @@
         $("#selectApiListModal").modal({
             remote: "/select_api_list"
         });
+    }
+    function reloadSelectApiList(groupId) {
+        var url = '/select_api_list/';
+        if(groupId){
+            url += '?group_id='+groupId
+        }
+        $("#selectApiListDiv").load(url);
     }
 
 
@@ -194,6 +205,10 @@
 
     $(document).ready(function () {
         activeMenu('/case_list');
+
+        $("#selectApiListModal").on("hidden.bs.modal", function () {
+            $(this).removeData("bs.modal");
+        });
 
         $('input[name=headerLabel]').bsSuggest(headerLabelData);
 

@@ -264,7 +264,6 @@ def api_detail(request):
     data['api'] = api
 
     header_list = Api_header.objects.filter(apiID=api_id)
-    print('header_list=======', type(header_list))
     data['header_list'] = header_list
 
     request_param_list = Api_request_param.objects.filter(apiID=api_id)
@@ -430,7 +429,8 @@ def send_request(request):
 
 
 def select_api_list(request):
-    print('select_api_list request param={}'.format(request.POST))
+    print('select_api_list request param={}'.format(request.GET))
+    group_id = request.GET.get('group_id', None)
 
     data = {}
     try:
@@ -438,8 +438,12 @@ def select_api_list(request):
         group_list = Api_group.objects.filter(project=Project(id=pid))
         data['group_list'] = group_list
 
-        api_list = Api.objects.all()
+        api_list = Api.objects.filter(project=Project(id=pid))
+        if group_id:
+            api_list = api_list.filter(group=Api_group(id=group_id))
+            data['group_id'] = int(group_id)
         data['api_list'] = api_list
+
 
     except Exception as e:
         traceback.print_exc()
@@ -529,10 +533,11 @@ def case_list(request):
     # print('updateUser===========', updateUser.userName)
 
     plist = Project.objects.all().values('id', 'projectName')
+    data['project_list'] = plist
 
     data['case_list'] = case_list
     data['q'] = q
-    data['project_list'] = plist
+
     return render(request, 'case_list.html', data)
 
 
@@ -568,6 +573,9 @@ def case_detail(request):
 
     item_list = Test_case_item.objects.filter(case=Test_case(id=id))
     data['item_list'] = item_list
+
+    plist = Project.objects.all().values('id', 'projectName')
+    data['project_list'] = plist
 
     return render(request, 'case_detail.html', data)
 
@@ -610,14 +618,20 @@ def del_case_item(request):
 
 def to_add_case_item(request):
     caseId = request.GET['caseId']
-    print('to_add_case_item caseId={}'.format(caseId))
+    apiId = request.GET.get('apiId', None)
+    print('to_add_case_item caseId={} apiId={}'.format(caseId, apiId))
 
     data = {'caseId': caseId}
-    # case = Test_case.objects.get(id=id)
-    # data['case'] = case
-    #
-    # item_list = Test_case_item.objects.filter(case=Test_case(id=id))
-    # data['item_list'] = item_list
+
+    if apiId:
+        api = Api.objects.get(id=apiId)
+        data['api'] = api
+
+        header_list = Api_header.objects.filter(apiID=apiId)
+        data['header_list'] = header_list
+
+        request_param_list = Api_request_param.objects.filter(apiID=apiId)
+        data['request_param_list'] = request_param_list
 
     plist = Project.objects.all().values('id', 'projectName')
     data['project_list'] = plist
