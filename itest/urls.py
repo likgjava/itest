@@ -58,6 +58,7 @@ urlpatterns = [
     path('to_edit_case_item/', views.to_edit_case_item),
     path('del_case_item/', views.del_case_item),
     path('auto_test/', views.auto_test),
+    path('test_result/', views.test_result),
 
     path('test/add/', views.add),
     path('test/sub/', views.sub),

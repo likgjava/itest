@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50018
 File Encoding         : 65001
 
-Date: 2018-03-22 18:08:16
+Date: 2018-03-22 23:08:25
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -225,6 +225,25 @@ CREATE TABLE `ams_test_case_item` (
 -- Records of ams_test_case_item
 -- ----------------------------
 INSERT INTO `ams_test_case_item` VALUES ('8', '8', '{\"headers\": [{\"headerName\": \"area\", \"headerValue\": \"010\"}], \"apiUri\": \"localhost:8000/test/add?a=1&b=2\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"GET\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"1\"}, {\"paramName\": \"b\", \"paramValue\": \"2\"}]}', null, '200', '1', '3', '两个数相加', 'localhost:8000/test/add?a=1&b=2', 'GET', 'HTTP');
+
+-- ----------------------------
+-- Table structure for ams_test_case_item_result
+-- ----------------------------
+DROP TABLE IF EXISTS `ams_test_case_item_result`;
+CREATE TABLE `ams_test_case_item_result` (
+  `id` int(11) NOT NULL auto_increment COMMENT 'id',
+  `item_id` int(11) NOT NULL COMMENT '用例条目ID',
+  `resultData` text COMMENT '测试结果内容',
+  PRIMARY KEY  (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- ----------------------------
+-- Records of ams_test_case_item_result
+-- ----------------------------
+INSERT INTO `ams_test_case_item_result` VALUES ('1', '8', '{\"url\": \"HTTP://localhost:8000/test/add?a=1&b=2\", \"apiMethod\": \"GET\", \"statusCode\": 200, \"headers\": {\"User-Agent\": \"python-requests/2.18.4\", \"Accept-Encoding\": \"gzip, deflate\", \"Accept\": \"*/*\", \"Connection\": \"keep-alive\", \"area\": \"010\"}, \"params\": {\"a\": \"1\", \"b\": \"2\"}, \"matchType\": 1, \"matchRule\": \"3\", \"returnBody\": \"{\\\"sum\\\": 3}\"}');
+INSERT INTO `ams_test_case_item_result` VALUES ('2', '8', '{\"url\": \"HTTP://localhost:8000/test/add?a=1&b=2\", \"apiMethod\": \"GET\", \"statusCode\": 200, \"headers\": {\"User-Agent\": \"python-requests/2.18.4\", \"Accept-Encoding\": \"gzip, deflate\", \"Accept\": \"*/*\", \"Connection\": \"keep-alive\", \"area\": \"010\"}, \"params\": {\"a\": \"1\", \"b\": \"2\"}, \"matchType\": 1, \"matchRule\": \"3\", \"returnBody\": \"{\\\"sum\\\": 3}\"}');
+INSERT INTO `ams_test_case_item_result` VALUES ('3', '8', '{\"url\": \"HTTP://localhost:8000/test/add?a=1&b=2\", \"apiMethod\": \"GET\", \"statusCode\": 200, \"headers\": {\"User-Agent\": \"python-requests/2.18.4\", \"Accept-Encoding\": \"gzip, deflate\", \"Accept\": \"*/*\", \"Connection\": \"keep-alive\", \"area\": \"010\"}, \"params\": {\"a\": \"1\", \"b\": \"2\"}, \"matchType\": 1, \"matchRule\": \"3\", \"returnBody\": \"{\\\"sum\\\": 3}\"}');
+INSERT INTO `ams_test_case_item_result` VALUES ('4', '8', '{\"url\": \"HTTP://localhost:8000/test/add?a=1&b=2\", \"apiMethod\": \"GET\", \"statusCode\": 200, \"headers\": {\"User-Agent\": \"python-requests/2.18.4\", \"Accept-Encoding\": \"gzip, deflate\", \"Accept\": \"*/*\", \"Connection\": \"keep-alive\", \"area\": \"010\"}, \"params\": {\"a\": \"1\", \"b\": \"2\"}, \"matchType\": 1, \"matchRule\": \"3\", \"returnBody\": \"{\\\"sum\\\": 3}\"}');
 
 -- ----------------------------
 -- Table structure for ams_user

@@ -73,3 +73,8 @@ class Test_case_item(models.Model):
     matchType = models.IntegerField()
     matchRule = models.CharField(max_length=255)
     case = models.ForeignKey(Test_case, on_delete=False)
+
+
+class Test_case_item_result(models.Model):
+    resultData = models.CharField(max_length=255)
+    item = models.ForeignKey(Test_case_item, on_delete=False)

@@ -91,9 +91,9 @@
                         <td>{{ item.apiName }}</td>
                         <td><span class="label label-success">{{ item.apiMethod }}</span></td>
                         <td>{{ item.apiUri }}</td>
-                        <td>尚无测试结果</td>
+                        <td data-name="result">尚无测试结果</td>
                         <td>
-                            <button title="测试" type="button" class="btn btn-default btn-sm" onclick="auto_test({{ item.id }})">
+                            <button title="测试" type="button" class="btn btn-default btn-sm" onclick="auto_test(this, {{ item.id }})">
                                 <span class="glyphicon glyphicon-flash"></span>
                             </button>
                             <button title="修改" type="button" class="btn btn-default btn-sm" onclick="to_edit_case_item({{ item.id }})">
@@ -116,6 +116,12 @@
 <div class="modal fade" id="selectApiListModal" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog" style="width: 800px;">
         <div class="modal-content" id="selectApiListDiv"></div>
+    </div>
+</div>
+<!-- 测试结果 -->
+<div class="modal fade" id="testResultModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" style="width: 800px;">
+        <div class="modal-content"></div>
     </div>
 </div>
 
@@ -158,23 +164,21 @@
         $("#selectApiListDiv").load(url);
     }
 
-    function auto_test(itemId) {
+    function auto_test(dom, itemId) {
+        var resultTd = $(dom).parent().parent().find('td[data-name=result]');
+        resultTd.html('测试中...');
         $.post('/auto_test/?itemId='+itemId, function (json) {
-            alert(JSON.stringify(json))
+            //alert(JSON.stringify(json))
+            var html = '<a href="javascript:;" onclick="viewTestResult('+json.item_result_id+')">查看结果</a>';
+            resultTd.html(html);
         });
     }
 
 
-    function changeMethod(dom) {
-        var rawBut = $('#rawBut');
-        if($(dom).val() === 'POST'){
-            rawBut.show();
-        }else{
-            rawBut.hide();
-            if(rawBut.hasClass('btn-success')){
-                rawBut.siblings().click();
-            }
-        }
+    function viewTestResult(item_result_id) {
+        $("#testResultModal").modal({
+            remote: "/test_result/?id="+item_result_id
+        });
     }
     function selectRequestParamTab(dom, type) {
         $(dom).removeClass('btn-default').addClass('btn-success');
@@ -219,6 +223,9 @@
         activeMenu('/case_list');
 
         $("#selectApiListModal").on("hidden.bs.modal", function () {
+            $(this).removeData("bs.modal");
+        });
+        $("#testResultModal").on("hidden.bs.modal", function () {
             $(this).removeData("bs.modal");
         });
 

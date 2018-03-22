@@ -12,7 +12,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render, redirect
 
 from ams.models import Api, Api_header, Api_request_param, User, Project, Test_case_group, Test_case, Test_case_item, \
-    Api_group
+    Api_group, Test_case_item_result
 
 
 def to_login(request):
@@ -761,6 +761,7 @@ def auto_test(request):
         # if case_item.matchType == 3:
         #     data['match_rule_list'] = json.loads(case_item.matchRule)
 
+
         url = case_item.apiProtocol + '://' + case_item.apiUri
 
         global r
@@ -772,8 +773,15 @@ def auto_test(request):
             else:
                 r = requests.post(url, data=caseData['raw'], headers=headers)
 
-        test_result = _build_test_result(r, url, case_item)
 
+        print('r.text============================', r.text)
+        print('r.request.headers============================', r.request.headers)
+        test_result = _build_test_result(r, url, case_item, params)
+
+        item_result = Test_case_item_result(resultData=test_result, item=case_item)
+        item_result.save()
+
+        result['item_result_id'] = item_result.id
         result['code'] = '0000'
     except Exception as e:
         result['code'] = '1001'
@@ -784,20 +792,46 @@ def auto_test(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
-def _build_test_result(response, url, case_item):
+def _build_test_result(response, url, case_item, params):
     print('status============', response.status_code)
     result = {}
     result['url'] = url
     result['apiMethod'] = case_item.apiMethod
     result['statusCode'] = response.status_code
 
-    result['body'] = html.escape(r.content.decode())
-    result_headers = {}
-    for k, v in r.headers.items():
-        result_headers[k] = v
-    result['headers'] = result_headers
+    request_headers = {}
+    for k, v in response.request.headers.items():
+        request_headers[k] = v
+    result['headers'] = request_headers
 
-    pass
+    result['params'] = params
+
+    result['matchType'] = case_item.matchType
+    result['matchStatusCode'] = case_item.statusCode
+    result['matchRule'] = case_item.matchRule
+
+    result['returnBody'] = r.content.decode()
+
+
+    print('test_result=======================', json.dumps(result))
+    return json.dumps(result)
+
+def test_result(request):
+    print('test_result request param={}'.format(request.GET))
+    id = request.GET['id']
+
+    data = {}
+    try:
+        item_result = Test_case_item_result.objects.get(id=id)
+        resultData = json.loads(item_result.resultData)
+        data['resultData'] = resultData
+
+        data['case_item'] = Test_case_item.objects.get(id=item_result.item.id)
+
+    except Exception as e:
+        traceback.print_exc()
+
+    return render(request, 'test_result.html', data)
 
 
 # ######################################################################################################
