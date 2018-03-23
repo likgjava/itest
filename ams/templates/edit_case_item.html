@@ -235,7 +235,7 @@
                     </div>
 
                     <div class="form-inline" id="statusCodeDiv" style="margin-top: 10px; display: none;">
-                        <input type="text" class="form-control" id="statusCode" value="{{ case_item.statusCode }}" placeholder="状态码" style="display: none">
+                        <input type="text" class="form-control" id="statusCode" value="{{ case_item.statusCode }}" placeholder="状态码">
                     </div>
 
                     <table id="jsonCheckTable" class="table table-striped" style="display: none">
@@ -527,7 +527,7 @@
                 var r = $(dom).find('select[name="matchRule"]').val();
                 var paramInfo = $(dom).find('input[name="paramInfo"]').val();
                 if (paramKey != null && paramKey !== ''){
-                    var matchRule = {'paramKey':paramKey, 'matchRule':r, 'paramInfo':paramInfo};
+                    var matchRule = {'paramKey':paramKey, 'matchRule':parseInt(r), 'paramInfo':paramInfo};
                     ruleList.push(matchRule);
                 }
             });

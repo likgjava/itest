@@ -18,22 +18,71 @@
             {% endfor %}
         </div>
     </div>
+
     <div class="panel panel-default">
-        <div class="panel-heading">请求参数[form-data]</div>
+        <div class="panel-heading">请求参数[{% ifequal resultData.requestType 'raw' %}raw{% else %}form-data{% endifequal %}]</div>
         <div class="panel-body">
-            {% for key,value in resultData.params.items %}
-                <p>{{ key }}：{{ value }}</p>
-            {% endfor %}
+            {% ifequal resultData.requestType 'raw' %}
+                {{ resultData.raw }}
+            {% else %}
+                {% for key,value in resultData.params.items %}
+                    <p>{{ key }}：{{ value }}</p>
+                {% endfor %}
+            {% endifequal %}
         </div>
     </div>
+
     <div class="panel panel-default">
         <div class="panel-heading">返回结果校验规则</div>
         <div class="panel-body">
             <p>状态码规则：{{ resultData.matchStatusCode }}</p>
-            <p>匹配规则：{{ resultData.matchType }}</p>
-            <p>规则内容：</p>
+            <p>匹配规则：
+                {% if resultData.matchType == 0 %}
+                    不匹配
+                {% elif resultData.matchType == 1 %}
+                    完全匹配
+                {% elif resultData.matchType == 2 %}
+                    正则匹配
+                {% else %}
+                    Json匹配
+                {% endif %}
+            </p>
+            <p>规则内容：
+                {% ifequal resultData.matchType 3 %}
+
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>参数名</th>
+                            <th>匹配规则</th>
+                            <th>匹配值</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for rule in resultData.matchRule %}
+                            <tr>
+                                <td>{{ rule.paramKey }}</td>
+                                <td>
+                                    {% if rule.matchRule == 0 %}无
+                                    {% elif rule.matchRule == 1 %}等于 [ = ]
+                                    {% elif rule.matchRule == 2 %}不等于 [ != ]
+                                    {% elif rule.matchRule == 3 %}大于 [ &gt; ]
+                                    {% elif rule.matchRule == 4 %}小于 [ &lt; ]
+                                    {% elif rule.matchRule == 5 %}正则 [ Reg= ]
+                                    {% endif %}
+                                </td>
+                                <td>{{ rule.paramInfo }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    {{ resultData.matchRule }}
+                {% endifequal %}
+            </p>
         </div>
     </div>
+
     <div class="panel panel-default">
         <div class="panel-heading">实际返回结果</div>
         <div class="panel-body">

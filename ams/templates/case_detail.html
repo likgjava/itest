@@ -45,8 +45,8 @@
             width: calc(100% - 2px);
             margin-top: 10px;
         }
-        .test-error{background-color: #d32f2f;}
-        .test-success{background-color: #4caf50;}
+        .result-success{color: green}
+        .result-failure{color: red}
 
     </style>
 
@@ -169,7 +169,16 @@
         resultTd.html('测试中...');
         $.post('/auto_test/?itemId='+itemId, function (json) {
             //alert(JSON.stringify(json))
-            var html = '<a href="javascript:;" onclick="viewTestResult('+json.item_result_id+')">查看结果</a>';
+            var html = '';
+            if(json.code === '0000'){
+                if(json.success){
+                    html = '<a href="javascript:;" class="result-success" onclick="viewTestResult('+json.item_result_id+')">成功，查看详情</a>';
+                }else{
+                    html = '<a href="javascript:;" class="result-failure" onclick="viewTestResult('+json.item_result_id+')">失败，查看详情</a>';
+                }
+            }else{
+                html = '系统异常';
+            }
             resultTd.html(html);
         });
     }

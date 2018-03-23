@@ -1,5 +1,6 @@
 import html
 import json
+import re
 import traceback
 
 import datetime
@@ -761,7 +762,6 @@ def auto_test(request):
         # if case_item.matchType == 3:
         #     data['match_rule_list'] = json.loads(case_item.matchRule)
 
-
         url = case_item.apiProtocol + '://' + case_item.apiUri
 
         global r
@@ -773,12 +773,16 @@ def auto_test(request):
             else:
                 r = requests.post(url, data=caseData['raw'], headers=headers)
 
-
         print('r.text============================', r.text)
         print('r.request.headers============================', r.request.headers)
-        test_result = _build_test_result(r, url, case_item, params)
 
-        item_result = Test_case_item_result(resultData=test_result, item=case_item)
+        # 验证测试结果
+        success = _check_test_result(case_item, r)
+        result['success'] = success
+
+        # 构建测试结果并保存
+        test_result = _build_test_result(r, url, case_item, params, caseData)
+        item_result = Test_case_item_result(resultData=test_result, item=case_item, success=success)
         item_result.save()
 
         result['item_result_id'] = item_result.id
@@ -792,7 +796,63 @@ def auto_test(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
-def _build_test_result(response, url, case_item, params):
+def _check_test_result(case_item, r):
+    print('_check_test_result matchType={}'.format(case_item.matchType))
+    try:
+        # 0:不校验
+        if case_item.matchType == 0:
+            return True
+
+        # 验证状态码
+        if case_item.statusCode != str(r.status_code):
+            print('_check_test_result rule status={} actual status={}'.format(case_item.statusCode, r.status_code))
+            return False
+
+        # 1:完全校验
+        returnBody = r.content.decode()
+        if case_item.matchType == 1:
+            return case_item.matchRule == returnBody
+
+        # 2:正则校验
+        if case_item.matchType == 2:
+            return re.match(case_item.matchRule, returnBody) is not None
+
+        # 3:json校验
+        if case_item.matchType == 3:
+            rule_list = json.loads(case_item.matchRule)
+            body = json.loads(returnBody)
+            for rule in rule_list:
+                # 无
+                if rule.matchRule == 0:
+                    if body[rule.paramKey] is None:
+                        return False
+                # 等于
+                elif rule.matchRule == 1:
+                    if body[rule.paramKey] != rule.paramInfo:
+                        return False
+                # 不等于
+                elif rule.matchRule == 2:
+                    if body[rule.paramKey] == rule.paramInfo:
+                        return False
+                # 大于
+                elif rule.matchRule == 3:
+                    if body[rule.paramKey] <= rule.paramInfo:
+                        return False
+                # 小于
+                elif rule.matchRule == 4:
+                    if body[rule.paramKey] >= rule.paramInfo:
+                        return False
+                # 正则
+                elif rule.matchRule == 5:
+                    if re.match(rule.paramInfo, body[rule.paramKey]) is None:
+                        return False
+            return True
+    except Exception as e:
+        traceback.print_exc()
+        return False
+
+
+def _build_test_result(response, url, case_item, params, caseData):
     print('status============', response.status_code)
     result = {}
     result['url'] = url
@@ -804,17 +864,23 @@ def _build_test_result(response, url, case_item, params):
         request_headers[k] = v
     result['headers'] = request_headers
 
+    result['requestType'] = caseData['requestType']
+    if caseData['requestType'] == 'raw':
+        result['raw'] = caseData['raw']
     result['params'] = params
 
     result['matchType'] = case_item.matchType
     result['matchStatusCode'] = case_item.statusCode
-    result['matchRule'] = case_item.matchRule
+    if case_item.matchType == 3:
+        result['matchRule'] = json.loads(case_item.matchRule)
+    else:
+        result['matchRule'] = case_item.matchRule
 
     result['returnBody'] = r.content.decode()
 
-
     print('test_result=======================', json.dumps(result))
     return json.dumps(result)
+
 
 def test_result(request):
     print('test_result request param={}'.format(request.GET))
@@ -852,6 +918,7 @@ def sub(request):
     a = request.GET['a']
     b = request.GET['b']
     c = int(a) - int(b)
+
     return HttpResponse(str(c))
 
 

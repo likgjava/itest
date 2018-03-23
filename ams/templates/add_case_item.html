@@ -507,7 +507,7 @@
                 var r = $(dom).find('select[name="matchRule"]').val();
                 var paramInfo = $(dom).find('input[name="paramInfo"]').val();
                 if (paramKey != null && paramKey !== ''){
-                    var matchRule = {'paramKey':paramKey, 'matchRule':r, 'paramInfo':paramInfo};
+                    var matchRule = {'paramKey':paramKey, 'matchRule':parseInt(r), 'paramInfo':paramInfo};
                     ruleList.push(matchRule);
                 }
             });
