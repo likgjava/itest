@@ -537,6 +537,8 @@ def case_list(request):
     if group_id:
         query = query.filter(group=Test_case_group(id=group_id))
         data['group_id'] = int(group_id)
+    else:
+        data['group_id'] = None
     case_list = query.order_by('-createTime')
     print('case_list======', case_list)
 
@@ -796,6 +798,64 @@ def auto_test(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+def auto_test_batch(request):
+    print('auto_test_batch request param={}'.format(request.GET))
+    caseId = request.GET.get('caseId', None)
+
+    result = {}
+    try:
+        test_result_list = []
+        item_list = Test_case_item.objects.filter(case=Test_case(id=caseId))
+        for item in item_list:
+            print('case_item.caseData================================================================', item.caseData)
+
+            # 构造请求头数据
+            headers = {}
+            caseData = json.loads(item.caseData)
+            header_list = caseData['headers']
+            for header in header_list:
+                headers[header['headerName']] = header['headerValue']
+
+            # 构造请求参数
+            params = {}
+            param_list = caseData['params']
+            for param in param_list:
+                params[param['paramName']] = param['paramValue']
+            requestType = caseData['requestType']
+
+            url = item.apiProtocol + '://' + item.apiUri
+
+            global r
+            if item.apiMethod == 'GET':
+                r = requests.get(url, params=params, headers=headers)
+            elif item.apiMethod == 'POST':
+                if requestType == 'formData':
+                    r = requests.post(url, params=params, headers=headers)
+                else:
+                    r = requests.post(url, data=caseData['raw'], headers=headers)
+
+            # 验证测试结果
+            success = _check_test_result(item, r)
+
+            # 构建测试结果并保存
+            test_result = _build_test_result(r, url, item, params, caseData)
+            item_result = Test_case_item_result(resultData=test_result, item=item, success=success)
+            item_result.save()
+
+            test_result = {'item_result_id': item_result.id, 'success': success}
+            test_result_list.append(test_result)
+
+        result['test_result_list'] = test_result_list
+        result['code'] = '0000'
+    except Exception as e:
+        result['code'] = '1001'
+        result['msg'] = str(e)
+        traceback.print_exc()
+
+    print('result==============={}'.format(result))
+    return HttpResponse(json.dumps(result), content_type="application/json")
+
+
 def _check_test_result(case_item, r):
     print('_check_test_result matchType={}'.format(case_item.matchType))
     try:
@@ -822,29 +882,33 @@ def _check_test_result(case_item, r):
             rule_list = json.loads(case_item.matchRule)
             body = json.loads(returnBody)
             for rule in rule_list:
+                print('_check_test_result rule={}'.format(rule))
+                matchRule = rule['matchRule']
+                paramKey = rule['paramKey']
+                paramInfo = rule['paramInfo']
                 # 无
-                if rule.matchRule == 0:
-                    if body[rule.paramKey] is None:
+                if matchRule == 0:
+                    if body[paramKey] is None:
                         return False
                 # 等于
-                elif rule.matchRule == 1:
-                    if body[rule.paramKey] != rule.paramInfo:
+                elif matchRule == 1:
+                    if str(body[paramKey]) != paramInfo:
                         return False
                 # 不等于
-                elif rule.matchRule == 2:
-                    if body[rule.paramKey] == rule.paramInfo:
+                elif matchRule == 2:
+                    if str(body[paramKey]) == paramInfo:
                         return False
                 # 大于
-                elif rule.matchRule == 3:
-                    if body[rule.paramKey] <= rule.paramInfo:
+                elif matchRule == 3:
+                    if str(body[paramKey]) <= paramInfo:
                         return False
                 # 小于
-                elif rule.matchRule == 4:
-                    if body[rule.paramKey] >= rule.paramInfo:
+                elif matchRule == 4:
+                    if str(body[paramKey]) >= paramInfo:
                         return False
                 # 正则
-                elif rule.matchRule == 5:
-                    if re.match(rule.paramInfo, body[rule.paramKey]) is None:
+                elif matchRule == 5:
+                    if re.match(paramInfo, str(body[paramKey])) is None:
                         return False
             return True
     except Exception as e:
@@ -853,7 +917,6 @@ def _check_test_result(case_item, r):
 
 
 def _build_test_result(response, url, case_item, params, caseData):
-    print('status============', response.status_code)
     result = {}
     result['url'] = url
     result['apiMethod'] = case_item.apiMethod
