@@ -9,14 +9,19 @@ class ExteriorAuthMiddleware(MiddlewareMixin):
     # 判断登录 权限控制
     def process_request(self, request):
         print('ExteriorAuthMiddleware..........request.path=', request.path)
+        print('ExteriorAuthMiddleware..........session.keys()={}'.format(request.session.keys()))
         if request.method == 'GET':
             requestData = request.GET
         else:
             requestData = request.POST
         request.session['errmsg'] = ''
 
+        # 退出
+        if request.path in ['/logout/']:
+            print('退出系统........')
+            pass
         # 未登录
-        if not request.session.has_key('user'):
+        elif not request.session.has_key('user'):
             # 测试接口
             if request.path.startswith('/test/'):
                 print('这是测试接口........')

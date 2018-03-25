@@ -45,8 +45,9 @@ def login(request):
 
 
 def logout(request):
+    print('logout session={}'.format(request.session))
     del request.session['user']
-    return redirect('/')
+    return redirect('/to_login')
 
 
 def to_register(request):
@@ -233,6 +234,8 @@ def api_list(request):
     if group_id:
         query = query.filter(group=Api_group(id=group_id))
         data['group_id'] = int(group_id)
+    else:
+        data['group_id'] = None
     api_list = query.order_by('-createTime')
     data['api_list'] = api_list
 
