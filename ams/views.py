@@ -46,7 +46,8 @@ def login(request):
 
 def logout(request):
     print('logout session={}'.format(request.session))
-    del request.session['user']
+    # del request.session['user']
+    request.session.clear()
     return redirect('/to_login')
 
 
