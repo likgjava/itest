@@ -72,10 +72,10 @@ class Test_case_item(models.Model):
     apiProtocol = models.CharField(max_length=255)
     matchType = models.IntegerField()
     matchRule = models.CharField(max_length=255)
-    case = models.ForeignKey(Test_case, on_delete=False)
+    case = models.ForeignKey(Test_case, on_delete=models.CASCADE)
 
 
 class Test_case_item_result(models.Model):
     resultData = models.CharField(max_length=255)
     success = models.IntegerField()
-    item = models.ForeignKey(Test_case_item, on_delete=False)
+    item = models.ForeignKey(Test_case_item, on_delete=models.CASCADE)

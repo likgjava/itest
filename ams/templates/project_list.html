@@ -95,6 +95,10 @@
                             <td>{{ project.projectVersion }}</td>
                             <td>{{ project.projectUpdateTime|date:"Y-m-d H:i:s" }}</td>
                             <td>
+                                <button title="详情" type="button" class="btn btn-default btn-sm"
+                                        onclick="to_project_detail({{ project.id }})">
+                                    <span class="glyphicon glyphicon-eye-open"></span>
+                                </button>
                                 <button title="修改" type="button" class="btn btn-default btn-sm"
                                         onclick="openModal({{ project.id }},'{{ project.projectName }}', '{{ project.projectVersion }}')">
                                     <span class="glyphicon glyphicon-edit"></span>
@@ -149,6 +153,9 @@
 </div>
 
 <script type="text/javascript">
+    function to_project_detail(pId) {
+        window.location.href = '/project_info/?pid=' + pId;
+    }
     function delProject(dom, id) {
         if (confirm('删除操作不可撤回，确定删除该项目吗？')) {
             $.post('/del_project/', {id: id}, function (json) {

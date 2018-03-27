@@ -137,13 +137,16 @@ def del_project(request):
     result = {}
     try:
         with transaction.atomic():
-            Project.objects.filter(id=project_id).delete()
             api_list = Api.objects.filter(project_id=project_id)
             for api in api_list:
                 api_id = api.id
                 Api.objects.filter(id=api_id).delete()
                 Api_header.objects.filter(apiID=api_id).delete()
                 Api_request_param.objects.filter(apiID=api_id).delete()
+            Test_case.objects.filter(project=Project(id=project_id)).delete()
+            Test_case_group.objects.filter(project=Project(id=project_id)).delete()
+            Api_group.objects.filter(project=Project(id=project_id)).delete()
+            Project.objects.filter(id=project_id).delete()
         result['code'] = '0000'
     except Exception as e:
         result['code'] = '1001'
