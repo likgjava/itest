@@ -761,6 +761,7 @@ def auto_test(request):
         for param in param_list:
             params[param['paramName']] = param['paramValue']
         requestType = caseData['requestType']
+        print('auto_test params=============================={}'.format(params))
 
         # 校验规则
         # data['match_rule_list'] = []
@@ -801,6 +802,24 @@ def auto_test(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+def _cal_param_value(param_value, response_data_list):
+    print('_cal_param_value param_value={} response_data_list={}'.format(param_value, response_data_list))
+    try:
+        # 格式：<response[0].sum>
+        match = re.match(r'<response\[(\d*)\]\.(.*)>', param_value)
+        if match:
+            index = match.group(1)
+            key = match.group(2)
+            print('_cal_param_value index={} key={}'.format(index, key))
+            response_data = response_data_list[int(index)]
+            return response_data[key]
+        else:
+            return param_value
+    except Exception as e:
+        traceback.print_exc()
+        return None
+
+
 def auto_test_batch(request):
     print('auto_test_batch request param={}'.format(request.GET))
     caseId = request.GET.get('caseId', None)
@@ -808,6 +827,7 @@ def auto_test_batch(request):
     result = {}
     try:
         test_result_list = []
+        response_data_list = []
         item_list = Test_case_item.objects.filter(case=Test_case(id=caseId))
         for item in item_list:
             print('case_item.caseData================================================================', item.caseData)
@@ -823,8 +843,10 @@ def auto_test_batch(request):
             params = {}
             param_list = caseData['params']
             for param in param_list:
-                params[param['paramName']] = param['paramValue']
+                paramValue = _cal_param_value(param['paramValue'], response_data_list)
+                params[param['paramName']] = paramValue
             requestType = caseData['requestType']
+            print('params========={}'.format(params))
 
             url = item.apiProtocol + '://' + item.apiUri
 
@@ -839,6 +861,10 @@ def auto_test_batch(request):
 
             # 验证测试结果
             success = _check_test_result(item, r)
+
+            # 缓存响应结果
+            response_data = _cache_response_data(item, r)
+            response_data_list.append(response_data)
 
             # 构建测试结果并保存
             test_result = _build_test_result(r, url, item, params, caseData)
@@ -859,6 +885,18 @@ def auto_test_batch(request):
     return HttpResponse(json.dumps(result), content_type="application/json")
 
 
+def _cache_response_data(case_item, r):
+    print('_cache_response_data matchType={}'.format(case_item.matchType))
+    try:
+        # 3:json校验
+        if case_item.matchType == 3:
+            returnBody = r.content.decode()
+            return json.loads(returnBody)
+    except Exception as e:
+        traceback.print_exc()
+        return {}
+
+
 def _check_test_result(case_item, r):
     print('_check_test_result matchType={}'.format(case_item.matchType))
     try:
@@ -873,6 +911,7 @@ def _check_test_result(case_item, r):
 
         # 1:完全校验
         returnBody = r.content.decode()
+        print('_check_test_result returnBody={} aa===================={}'.format(returnBody, returnBody == 'None'))
         if case_item.matchType == 1:
             return case_item.matchRule == returnBody
 
@@ -882,8 +921,12 @@ def _check_test_result(case_item, r):
 
         # 3:json校验
         if case_item.matchType == 3:
+            if not returnBody:
+                return False
             rule_list = json.loads(case_item.matchRule)
             body = json.loads(returnBody)
+            if not isinstance(body, dict):
+                return False
             for rule in rule_list:
                 print('_check_test_result rule={}'.format(rule))
                 matchRule = rule['matchRule']
@@ -891,8 +934,9 @@ def _check_test_result(case_item, r):
                 paramInfo = rule['paramInfo']
                 # 无
                 if matchRule == 0:
-                    if body[paramKey] is None:
-                        return False
+                    # if body.get(paramKey) is None:
+                    #     return False
+                    continue
                 # 等于
                 elif matchRule == 1:
                     if str(body[paramKey]) != paramInfo:
@@ -966,6 +1010,28 @@ def test_result(request):
     return render(request, 'test_result.html', data)
 
 
+def bind_param(request):
+    print('bind_param request param={}'.format(request.GET))
+    itemId = request.GET['itemId']
+    index = request.GET['index']
+
+    data = {}
+    try:
+        case_item = Test_case_item.objects.get(id=itemId)
+        item_list = Test_case_item.objects.filter(case=case_item.case, id__lt=itemId)
+        for item in item_list:
+            if item.matchType == 3:
+                item.matchRule = json.loads(item.matchRule)
+            else:
+                item.matchRule = []
+        data['item_list'] = item_list
+        data['index'] = index
+    except Exception as e:
+        traceback.print_exc()
+
+    return render(request, 'bind_param.html', data)
+
+
 # ######################################################################################################
 # #################################################### test ############################################
 def add(request):
@@ -981,11 +1047,14 @@ def add(request):
 
 def sub(request):
     print('sub================{}'.format(request.GET))
-    a = request.GET['a']
-    b = request.GET['b']
-    c = int(a) - int(b)
-
-    return HttpResponse(str(c))
+    result = None
+    try:
+        a = request.GET['a']
+        b = request.GET['b']
+        result = int(a) - int(b)
+    except Exception as e:
+        print('sub error.', str(e))
+    return HttpResponse(str(result))
 
 
 def add2(request, a, b):

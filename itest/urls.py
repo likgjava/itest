@@ -60,6 +60,7 @@ urlpatterns = [
     path('auto_test/', views.auto_test),
     path('auto_test_batch/', views.auto_test_batch),
     path('test_result/', views.test_result),
+    path('bind_param/', views.bind_param),
 
     path('test/add/', views.add),
     path('test/sub/', views.sub),

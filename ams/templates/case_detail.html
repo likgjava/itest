@@ -190,8 +190,7 @@
         var resultTd = $('#itemListTable').find('td[data-name=result]');
         resultTd.html('测试中...');
         $.post('/auto_test_batch/?caseId='+caseId, function (json) {
-            alert(JSON.stringify(json))
-
+            //alert(JSON.stringify(json))
             var html = '';
             if(json.code === '0000'){
                 resultTd.each(function (i, dom) {

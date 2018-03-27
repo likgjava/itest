@@ -8,7 +8,7 @@ no_auth_path = ['/to_login/', '/login/', '/to_register/', '/register/', '/logout
 class ExteriorAuthMiddleware(MiddlewareMixin):
     # 判断登录 权限控制
     def process_request(self, request):
-        print('ExteriorAuthMiddleware..........request.path=', request.path)
+        print('ExteriorAuthMiddleware {} request.path={}'.format('*' * 100, request.path))
         print('ExteriorAuthMiddleware..........session.keys()={}'.format(request.session.keys()))
         if request.method == 'GET':
             requestData = request.GET
