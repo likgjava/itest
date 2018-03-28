@@ -88,7 +88,7 @@
         <div class="panel-body">
             <p>实际状态码：{{ resultData.statusCode }}</p>
             <p>实际返回内容：</p>
-            <pre>{{ resultData.returnBody }}</pre>
+            <pre class="{% if isSuccess %}return-body-success{% else %}return-body-failure{% endif %}">{{ resultData.returnBody }}</pre>
         </div>
     </div>
 

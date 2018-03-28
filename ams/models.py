@@ -76,6 +76,6 @@ class Test_case_item(models.Model):
 
 
 class Test_case_item_result(models.Model):
-    resultData = models.CharField(max_length=255)
+    resultData = models.TextField()
     success = models.IntegerField()
     item = models.ForeignKey(Test_case_item, on_delete=models.CASCADE)

@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50018
 File Encoding         : 65001
 
-Date: 2018-03-27 18:12:52
+Date: 2018-03-28 16:42:56
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -45,6 +45,7 @@ INSERT INTO `ams_api` VALUES ('21', '两个数相加', 'localhost:8000/test/add?
 INSERT INTO `ams_api` VALUES ('38', '阳光易购', 'www.ebid360.com', 'HTTP', 'POST', 'raw', 0x61616161616161616161616262626262626262626262626262626262626262626262, 0x616161616161616161616161, 0x7BE28098636F6465E280993A313131317D, '0', null, '2', '5', '2018-03-21 15:19:41', '2018-03-21 15:19:41');
 INSERT INTO `ams_api` VALUES ('40', 'aa', 'aa', 'HTTP', 'POST', 'formData', '', '', '', '0', null, '2', '3', '2018-03-16 14:16:32', '2018-03-16 14:16:32');
 INSERT INTO `ams_api` VALUES ('42', '加法接口测试', '127.0.0.1:8000/test/add/', 'HTTP', 'POST', 'formData', '', 0x33, '', '0', null, '2', '4', '2018-03-16 15:45:53', '2018-03-16 15:45:53');
+INSERT INTO `ams_api` VALUES ('43', '两个数相减', 'localhost:8000/test/sub', 'HTTP', 'POST', 'formData', '', 0x32, 0x4E6F6E65, '0', '3', '1', '4', '2018-03-28 10:49:05', '2018-03-28 10:49:05');
 
 -- ----------------------------
 -- Table structure for ams_api_group
@@ -106,6 +107,8 @@ INSERT INTO `ams_api_request_param` VALUES ('29', 'a', '1', '0', '42', '0');
 INSERT INTO `ams_api_request_param` VALUES ('30', 'b', '2', '0', '42', '0');
 INSERT INTO `ams_api_request_param` VALUES ('34', 'a', '1', '0', '21', '0');
 INSERT INTO `ams_api_request_param` VALUES ('35', 'b', '2', '0', '21', '0');
+INSERT INTO `ams_api_request_param` VALUES ('36', 'a', '10', '0', '43', '0');
+INSERT INTO `ams_api_request_param` VALUES ('37', 'b', '8', '0', '43', '0');
 
 -- ----------------------------
 -- Table structure for ams_api_result_param
@@ -183,6 +186,7 @@ CREATE TABLE `ams_test_case` (
 -- Records of ams_test_case
 -- ----------------------------
 INSERT INTO `ams_test_case` VALUES ('8', '1', '单接口测试-加法', null, null, null, '2018-03-22 16:13:37', '3', '0', null);
+INSERT INTO `ams_test_case` VALUES ('9', '1', '单接口测试-减法', null, null, null, '2018-03-28 11:19:58', '3', '0', null);
 
 -- ----------------------------
 -- Table structure for ams_test_case_group
@@ -200,7 +204,7 @@ CREATE TABLE `ams_test_case_group` (
 -- ----------------------------
 INSERT INTO `ams_test_case_group` VALUES ('1', '范德萨', '2');
 INSERT INTO `ams_test_case_group` VALUES ('2', '登录模块', '2');
-INSERT INTO `ams_test_case_group` VALUES ('3', '加法测试用例', '1');
+INSERT INTO `ams_test_case_group` VALUES ('3', '加减乘除测试', '1');
 
 -- ----------------------------
 -- Table structure for ams_test_case_item
@@ -225,7 +229,7 @@ CREATE TABLE `ams_test_case_item` (
 -- Records of ams_test_case_item
 -- ----------------------------
 INSERT INTO `ams_test_case_item` VALUES ('8', '8', '{\"headers\": [{\"headerName\": \"area\", \"headerValue\": \"010\"}], \"apiUri\": \"localhost:8000/test/add?a=1&b=2\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"GET\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"1\"}, {\"paramName\": \"b\", \"paramValue\": \"2\"}]}', null, '200', '3', '[{\"paramKey\":\"sum\",\"matchRule\":1,\"paramInfo\":\"3\"},{\"paramKey\":\"a\",\"matchRule\":0,\"paramInfo\":\"1\"},{\"paramKey\":\"bb\",\"matchRule\":0,\"paramInfo\":\"2\"}]', '两个数相加', 'localhost:8000/test/add?a=1&b=2', 'GET', 'HTTP');
-INSERT INTO `ams_test_case_item` VALUES ('9', '8', '{\"headers\": [{\"headerName\": \"t\", \"headerValue\": \"t\"}], \"apiUri\": \"localhost:8000/test/sub\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"GET\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"<response[0].sum>\"}, {\"paramName\": \"b\", \"paramValue\": \"10\"}]}', null, '200', '1', '-7', 'tttt', 'localhost:8000/test/sub', 'GET', 'HTTP');
+INSERT INTO `ams_test_case_item` VALUES ('11', '9', '{\"headers\": [], \"apiUri\": \"localhost:8000/test/sub\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"POST\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"10\"}, {\"paramName\": \"b\", \"paramValue\": \"8\"}]}', null, '200', '1', '2', '两个数相减', 'localhost:8000/test/sub', 'POST', 'HTTP');
 
 -- ----------------------------
 -- Table structure for ams_test_case_item_result
@@ -234,7 +238,7 @@ DROP TABLE IF EXISTS `ams_test_case_item_result`;
 CREATE TABLE `ams_test_case_item_result` (
   `id` int(11) NOT NULL auto_increment COMMENT 'id',
   `item_id` int(11) NOT NULL COMMENT '用例条目ID',
-  `resultData` text COMMENT '测试结果内容',
+  `resultData` mediumtext COMMENT '测试结果内容',
   `success` tinyint(1) default '0' COMMENT '测试结果[0:失败; 1:成功]',
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

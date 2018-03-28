@@ -48,6 +48,9 @@
         .result-success{color: green}
         .result-failure{color: red}
 
+        .return-body-success{background-color: #f1f8e9;}
+        .return-body-failure{background-color: #fae4e6;}
+
     </style>
 
 </head>
@@ -69,9 +72,11 @@
                     <button type="button" class="btn btn-success" onclick="openSelectApiListModal()">+ 已有接口</button>
                     <button type="button" class="btn btn-success" onclick="to_add_case_item({{ case.id }})">+ 空白接口</button>
                     &nbsp;&nbsp;
+                    {% if item_list.count > 0 %}
                     <button type="button" class="btn btn-info btn-sm" onclick="auto_test_batch({{ case.id }})">
                         <span class="glyphicon glyphicon-tasks"></span> 测试全部
                     </button>
+                    {% endif %}
                 </div>
                 <div class="nav navbar-nav navbar-right">
                 </div>

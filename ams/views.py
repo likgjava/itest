@@ -783,7 +783,7 @@ def auto_test(request):
             else:
                 r = requests.post(url, data=caseData['raw'], headers=headers)
 
-        print('r.text============================', r.text)
+        # print('r.text============================', r.text)
         print('r.request.headers============================', r.request.headers)
 
         # 验证测试结果
@@ -989,10 +989,8 @@ def _build_test_result(response, url, case_item, params, caseData):
         result['matchRule'] = json.loads(case_item.matchRule)
     else:
         result['matchRule'] = case_item.matchRule
-
     result['returnBody'] = r.content.decode()
 
-    print('test_result=======================', json.dumps(result))
     return json.dumps(result)
 
 
@@ -1005,6 +1003,7 @@ def test_result(request):
         item_result = Test_case_item_result.objects.get(id=id)
         resultData = json.loads(item_result.resultData)
         data['resultData'] = resultData
+        data['isSuccess'] = item_result.success
 
         data['case_item'] = Test_case_item.objects.get(id=item_result.item.id)
 
@@ -1050,7 +1049,7 @@ def add(request):
 
 
 def sub(request):
-    print('sub================{}'.format(request.GET))
+    print('sub method={} ================{}'.format(request.method, request.GET))
     result = None
     try:
         a = request.GET['a']
