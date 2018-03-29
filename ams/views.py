@@ -21,8 +21,6 @@ log = logging.getLogger(__name__)
 
 
 def to_login(request):
-    print('__name================================================================', __name__)
-    log.info('tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt')
     return render(request, 'login.html')
 
 
@@ -34,7 +32,7 @@ def login(request):
     try:
         user = User.objects.filter(userName=userName, userPassword=userPassword).first()
         if user:
-            print('user==========', user)
+            log.info('user==========%s', user)
             d = {'id': user.id, 'userName': user.userName}
             request.session['user'] = d
             data['code'] = '0000'
