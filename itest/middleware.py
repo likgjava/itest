@@ -1,15 +1,18 @@
+import logging
+
 from django.http import HttpResponseRedirect
 from django.utils.deprecation import MiddlewareMixin
 
 no_auth_path = ['/to_login/', '/login/', '/to_register/', '/register/', '/logout/',
                 '/check_user_name_exist/']
+log = logging.getLogger(__name__)
 
 
 class ExteriorAuthMiddleware(MiddlewareMixin):
     # 判断登录 权限控制
     def process_request(self, request):
-        print('ExteriorAuthMiddleware {} request.path={}'.format('*' * 100, request.path))
-        print('ExteriorAuthMiddleware..........session.keys()={}'.format(request.session.keys()))
+        log.info('*' * 100)
+        log.info('ExteriorAuthMiddleware request.path={}'.format(request.path))
         if request.method == 'GET':
             requestData = request.GET
         else:

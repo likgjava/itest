@@ -210,6 +210,9 @@
                                     <input type="text" class="form-control" name="param_value" onkeyup="changeParamValue(this)" placeholder="参数值">
                                 </td>
                                 <td style="display: none">
+                                    <button type="button" class="btn btn-default btn-sm" onclick="openBindParamModal(this)">
+                                        <span class="glyphicon glyphicon-link"></span> 关联
+                                    </button>
                                     <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
                                         <span class="glyphicon glyphicon-trash"></span>
                                     </button>
@@ -258,12 +261,12 @@
                             </td>
                             <td>
                                 <select class="form-control" name="matchRule">
-                                    <option value="0" {% ifequal match_rule.matchRule '0' %}selected="selected"{% endifequal %}>无</option>
-                                    <option value="1" {% ifequal match_rule.matchRule '1' %}selected="selected"{% endifequal %}>等于 [ = ]</option>
-                                    <option value="2" {% ifequal match_rule.matchRule '2' %}selected="selected"{% endifequal %}>不等于 [ != ]</option>
-                                    <option value="3" {% ifequal match_rule.matchRule '3' %}selected="selected"{% endifequal %}>大于 [ &gt; ]</option>
-                                    <option value="4" {% ifequal match_rule.matchRule '4' %}selected="selected"{% endifequal %}>小于 [ &lt; ]</option>
-                                    <option value="5" {% ifequal match_rule.matchRule '5' %}selected="selected"{% endifequal %}>正则 [ Reg= ]</option>
+                                    <option value="0" {% ifequal match_rule.matchRule 0 %}selected="selected"{% endifequal %}>无</option>
+                                    <option value="1" {% ifequal match_rule.matchRule 1 %}selected="selected"{% endifequal %}>等于 [ = ]</option>
+                                    <option value="2" {% ifequal match_rule.matchRule 2 %}selected="selected"{% endifequal %}>不等于 [ != ]</option>
+                                    <option value="3" {% ifequal match_rule.matchRule 3 %}selected="selected"{% endifequal %}>大于 [ &gt; ]</option>
+                                    <option value="4" {% ifequal match_rule.matchRule 4 %}selected="selected"{% endifequal %}>小于 [ &lt; ]</option>
+                                    <option value="5" {% ifequal match_rule.matchRule 5 %}selected="selected"{% endifequal %}>正则 [ Reg= ]</option>
                                 </select>
                             </td>
                             <td>
@@ -352,6 +355,9 @@
                    placeholder="参数值">
         </td>
         <td style="display: none">
+            <button type="button" class="btn btn-default btn-sm" onclick="openBindParamModal(this)">
+                <span class="glyphicon glyphicon-link"></span> 关联
+            </button>
             <button type="button" class="btn btn-default btn-sm" onclick="delParamTableTr(this)">
                 <span class="glyphicon glyphicon-trash"></span>
             </button>
@@ -399,7 +405,7 @@
     function openBindParamModal(dom) {
         var index = $(dom).parent().parent().index();
         $("#bindParamModal").modal({
-            remote: "/bind_param/?itemId="+$('#itemId').val() + '&index='+index
+            remote: "/bind_param/?caseId={{ caseId }}&itemId="+$('#itemId').val() + '&index='+index
         });
     }
     function to_case_detail(id) {

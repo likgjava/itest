@@ -1,6 +1,8 @@
 import json
 import re
 
+import sys
+
 a = 'hello' in ['hello3', 'hello2']
 print(a)
 
@@ -28,3 +30,6 @@ if isinstance(d, dict):
     print("d is dict")
 else:
     print('d is not dict...')
+
+
+print('max===', sys.maxsize)

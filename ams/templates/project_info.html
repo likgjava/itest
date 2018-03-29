@@ -46,16 +46,23 @@
                 <div class="nav navbar-nav navbar-right"></div>
             </div>
 
-
             <table class="table table-bordered">
                 <tbody>
                 <tr>
-                    <td colspan="2" class="title-pname">{{ project.projectName }}</td>
+                    <td colspan="4" class="title-pname">{{ project.projectName }}</td>
                 </tr>
                 <tr>
                     <td>
                         <p class="title-p">V{{ project.projectVersion }}</p>
                         <p class="desc-p">版本号</p>
+                    </td>
+                    <td>
+                        <p class="title-p">{{ api_count }}</p>
+                        <p class="desc-p">接口总数</p>
+                    </td>
+                    <td>
+                        <p class="title-p">{{ case_count }}</p>
+                        <p class="desc-p">用例总数</p>
                     </td>
                     <td>
                         <p class="title-p">{{ project.projectUpdateTime|date:"Y-m-d H:i:s" }}</p>

@@ -1,5 +1,6 @@
 import html
 import json
+import logging
 import re
 import traceback
 
@@ -7,6 +8,7 @@ import datetime
 import requests
 import time
 
+import sys
 from django.db import transaction
 from django.db.models import Q
 from django.http import HttpResponse, HttpResponseRedirect
@@ -15,8 +17,12 @@ from django.shortcuts import render, redirect
 from ams.models import Api, Api_header, Api_request_param, User, Project, Test_case_group, Test_case, Test_case_item, \
     Api_group, Test_case_item_result
 
+log = logging.getLogger(__name__)
+
 
 def to_login(request):
+    print('__name================================================================', __name__)
+    log.info('tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt')
     return render(request, 'login.html')
 
 
@@ -45,7 +51,7 @@ def login(request):
 
 
 def logout(request):
-    print('logout session={}'.format(request.session))
+    log.info('logout session={}'.format(request.session))
     # del request.session['user']
     request.session.clear()
     return redirect('/to_login')
@@ -104,6 +110,11 @@ def project_info(request):
         project = Project.objects.get(id=pid)
         data['project'] = project
 
+        # 获取接口和用例总数
+        data['api_count'] = Api.objects.filter(project=project).count()
+        data['case_count'] = Test_case.objects.filter(project=project).count()
+
+        # 保存到session中
         request.session['pid'] = pid
         request.session['pname'] = project.projectName
         return render(request, 'project_info.html', data)
@@ -326,9 +337,10 @@ def edit_api(request):
 
 
 def add_api(request):
+    pid = request.session['pid']
     plist = Project.objects.all().values('id', 'projectName')
     data = {'project_list': plist}
-    data['group_list'] = Api_group.objects.all()
+    data['group_list'] = Api_group.objects.filter(project=Project(id=pid))
     return render(request, 'add_api.html', data)
 
 
@@ -538,7 +550,7 @@ def case_list(request):
     group_list = Test_case_group.objects.filter(project=Project(id=project_id))
     data['group_list'] = group_list
 
-    query = Test_case.objects
+    query = Test_case.objects.filter(project=Project(id=project_id))
     if q != '':
         query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
     if group_id:
@@ -1015,13 +1027,14 @@ def test_result(request):
 
 def bind_param(request):
     print('bind_param request param={}'.format(request.GET))
-    itemId = request.GET['itemId']
+    caseId = request.GET['caseId']
     index = request.GET['index']
+    itemId = request.GET.get('itemId', sys.maxsize)
 
     data = {}
     try:
-        case_item = Test_case_item.objects.get(id=itemId)
-        item_list = Test_case_item.objects.filter(case=case_item.case, id__lt=itemId)
+        # case_item = Test_case_item.objects.get(id=itemId)
+        item_list = Test_case_item.objects.filter(case=Test_case(id=caseId), id__lt=itemId)
         for item in item_list:
             if item.matchType == 3:
                 item.matchRule = json.loads(item.matchRule)
@@ -1031,7 +1044,6 @@ def bind_param(request):
         data['index'] = index
     except Exception as e:
         traceback.print_exc()
-
     return render(request, 'bind_param.html', data)
 
 
