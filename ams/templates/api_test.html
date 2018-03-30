@@ -40,7 +40,7 @@
 
             <div class="container-fluid" style="padding-left: 0; margin-bottom: 10px;">
                 <div class="navbar-header">
-                    <button type="button" class="btn btn-default" onclick="to_api_list()">&lt;接口列表</button>
+                    <button type="button" class="btn btn-default" onclick="to_api_list()">&lt; 接口列表</button>
                     &nbsp;&nbsp;
                     <div class="btn-group">
                         <button type="button" class="btn btn-default" onclick="to_api_detail({{ api.id }})">详情</button>
@@ -206,12 +206,9 @@
                 <div class="panel-body">
                     <div class="tabbable" id="tabs-515722">
                         <ul class="nav nav-tabs">
-                            <li class="active">
-                                <a href="#panel-body" data-toggle="tab">body</a>
-                            </li>
-                            <li>
-                                <a href="#panel-932680" data-toggle="tab">header</a>
-                            </li>
+                            <li class="active"><a href="#panel-body" data-toggle="tab">响应内容</a></li>
+                            <li><a href="#panel-932680" data-toggle="tab">响应头部</a></li>
+                            <li><a href="#panel-request_headers" data-toggle="tab">请求头部</a></li>
                         </ul>
                         <div class="tab-content">
                             <div class="tab-pane active" id="panel-body">
@@ -225,6 +222,9 @@
                             </div>
                             <div class="tab-pane" id="panel-932680">
                                 <p id="response_header"></p>
+                            </div>
+                            <div class="tab-pane" id="panel-request_headers">
+                                <p id="request_headers"></p>
                             </div>
                         </div>
                     </div>
@@ -392,6 +392,12 @@
                 html += '<span class="test-header-key">'+key + '</span>: ' + json.headers[key] + '<br/>';
             }
             $('#response_header').html(html);
+
+            html = '';
+            for (var key in json.request_headers){
+                html += '<span class="test-header-key">'+key + '</span>: ' + json.request_headers[key] + '<br/>';
+            }
+            $('#request_headers').html(html);
         });
     }
 

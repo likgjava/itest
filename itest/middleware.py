@@ -35,7 +35,7 @@ class ExteriorAuthMiddleware(MiddlewareMixin):
         # 已登录
         else:
             pid = request.session.get('pid', None)
-            print('pid===================================', pid)
+            log.info('pid======{}'.format(pid))
             # 如果是登录则转到首页
             if request.path in ['/', '/to_login/']:
                 return HttpResponseRedirect('/project_list/')

@@ -62,6 +62,8 @@ urlpatterns = [
     path('test_result/', views.test_result),
     path('bind_param/', views.bind_param),
 
+    path('mock/<pid>/<apiId>/', views.mock),
+
     path('test/add/', views.add),
     path('test/sub/', views.sub),
     path('add2/<int:a>/<int:b>/', views.add2),

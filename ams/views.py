@@ -280,7 +280,10 @@ def del_api(request):
 
 def api_detail(request):
     api_id = request.GET['apiId']
-    print('api_detail api_id={}'.format(api_id))
+    log.info('api_detail api_id={}'.format(api_id))
+
+    print('hhhhhhhhhhhhhhhhhhhhhh=======', request.path_info)
+    print('hhhhhhhhhhhhhhhhhhhhhh=======', request.get_host())
 
     data = {}
     api = Api.objects.get(id=api_id)
@@ -291,6 +294,12 @@ def api_detail(request):
 
     request_param_list = Api_request_param.objects.filter(apiID=api_id)
     data['request_param_list'] = request_param_list
+
+    # mock url
+    pid = request.session['pid']
+    mock_url = 'http://{}/mock/{}/{}/'.format(request.get_host(), pid, api_id)
+    data['success_mock_url'] = mock_url
+    data['failure_mock_url'] = mock_url + '?type=failure'
 
     return render(request, 'api_detail.html', data)
 
@@ -402,7 +411,10 @@ def save_api(request):
 
 
 def send_request(request):
-    print('send_request request param={}'.format(request.POST))
+    """
+    发送请求
+    """
+    log.info('send_request request param={}'.format(request.POST))
     protocol = request.POST['protocol']
     method = request.POST['method']
     uri = request.POST['uri']
@@ -415,9 +427,6 @@ def send_request(request):
     start_time = time.time()
     try:
         headers = json.loads(headers_str)
-
-        print('headers=====', type(headers))
-
         url = protocol + '://' + uri
 
         if method == 'GET':
@@ -439,6 +448,12 @@ def send_request(request):
             result_headers[k] = v
         result['headers'] = result_headers
 
+        request_headers = {}
+        for k, v in r.request.headers.items():
+            request_headers[k] = v
+        result['request_headers'] = request_headers
+
+        print('ddddddddddddddddddddddd====', r.request.body)
 
     except Exception as e:
         result['httpCode'] = 500
@@ -540,34 +555,26 @@ def case_list(request):
     project_id = request.session['pid']
     print('case_list q={} group_id={}'.format(q, group_id))
 
-    user = request.session['user']
-    print('user type======', type(user))
-
     # 获取分组数据
     data = {}
-    group_list = Test_case_group.objects.filter(project=Project(id=project_id))
-    data['group_list'] = group_list
+    data['group_list'] = Test_case_group.objects.filter(project=Project(id=project_id))
 
     query = Test_case.objects.filter(project=Project(id=project_id))
     if q != '':
-        query = query.filter(Q(apiName__contains=q) | Q(apiURI__contains=q))
+        query = query.filter(Q(caseName__contains=q))
     if group_id:
         query = query.filter(group=Test_case_group(id=group_id))
         data['group_id'] = int(group_id)
     else:
         data['group_id'] = None
     case_list = query.order_by('-createTime')
-    print('case_list======', case_list)
-
-    # updateUser = api_list[0].updateUser
-    # print('updateUser===========', updateUser.userName)
 
     plist = Project.objects.all().values('id', 'projectName')
     data['project_list'] = plist
 
     data['case_list'] = case_list
     data['q'] = q
-
+    log.info('case_list response data={}'.format(data))
     return render(request, 'case_list.html', data)
 
 
@@ -1043,6 +1050,23 @@ def bind_param(request):
     except Exception as e:
         traceback.print_exc()
     return render(request, 'bind_param.html', data)
+
+
+# ######################################################################################################
+# #################################################### mock ############################################
+def mock(request, pid, apiId):
+    log.info('mock pid={} apiId={}'.format(pid, apiId))
+    type = request.GET.get('type')
+
+    try:
+        api = Api.objects.get(id=apiId)
+        if type == 'failure':
+            return HttpResponse(api.apiFailureMock)
+        else:
+            return HttpResponse(api.apiSuccessMock)
+    except Exception as e:
+        log.error('mock error. {}'.format(e))
+        return HttpResponse('sorry,this api without the mock data.')
 
 
 # ######################################################################################################
