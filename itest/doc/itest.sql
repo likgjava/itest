@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50018
 File Encoding         : 65001
 
-Date: 2018-03-28 16:42:56
+Date: 2018-03-30 18:00:33
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -41,11 +41,9 @@ CREATE TABLE `ams_api` (
 -- ----------------------------
 -- Records of ams_api
 -- ----------------------------
-INSERT INTO `ams_api` VALUES ('21', '两个数相加', 'localhost:8000/test/add?a=1&b=2', 'HTTP', 'GET', 'formData', '', 0x7B73756D3A337D, 0x4E6F6E65, '0', '1', '1', '4', '2018-03-22 14:46:35', '2018-03-22 14:46:35');
-INSERT INTO `ams_api` VALUES ('38', '阳光易购', 'www.ebid360.com', 'HTTP', 'POST', 'raw', 0x61616161616161616161616262626262626262626262626262626262626262626262, 0x616161616161616161616161, 0x7BE28098636F6465E280993A313131317D, '0', null, '2', '5', '2018-03-21 15:19:41', '2018-03-21 15:19:41');
-INSERT INTO `ams_api` VALUES ('40', 'aa', 'aa', 'HTTP', 'POST', 'formData', '', '', '', '0', null, '2', '3', '2018-03-16 14:16:32', '2018-03-16 14:16:32');
-INSERT INTO `ams_api` VALUES ('42', '加法接口测试', '127.0.0.1:8000/test/add/', 'HTTP', 'POST', 'formData', '', 0x33, '', '0', null, '2', '4', '2018-03-16 15:45:53', '2018-03-16 15:45:53');
+INSERT INTO `ams_api` VALUES ('21', '两个数相加', 'localhost:8000/test/add/', 'HTTP', 'GET', 'formData', '', 0x7B73756D3A337D, 0x7B27636F6465273A2731303031272C20276D7367273A27E7B3BBE7BB9FE5BC82E5B8B8277D, '0', '1', '1', '4', '2018-03-30 15:21:31', '2018-03-30 15:21:31');
 INSERT INTO `ams_api` VALUES ('43', '两个数相减', 'localhost:8000/test/sub', 'HTTP', 'POST', 'formData', '', 0x32, 0x4E6F6E65, '0', '3', '1', '4', '2018-03-28 10:49:05', '2018-03-28 10:49:05');
+INSERT INTO `ams_api` VALUES ('44', '发的萨芬撒', '范德萨', 'HTTP', 'POST', 'formData', '', '', '', '0', '4', '2', '4', '2018-03-29 10:58:53', '2018-03-29 10:58:53');
 
 -- ----------------------------
 -- Table structure for ams_api_group
@@ -64,6 +62,7 @@ CREATE TABLE `ams_api_group` (
 -- ----------------------------
 INSERT INTO `ams_api_group` VALUES ('1', '加法', '1');
 INSERT INTO `ams_api_group` VALUES ('3', '减法', '1');
+INSERT INTO `ams_api_group` VALUES ('4', '测试', '2');
 
 -- ----------------------------
 -- Table structure for ams_api_header
@@ -80,10 +79,7 @@ CREATE TABLE `ams_api_header` (
 -- ----------------------------
 -- Records of ams_api_header
 -- ----------------------------
-INSERT INTO `ams_api_header` VALUES ('37', 'a', 'a', '40');
-INSERT INTO `ams_api_header` VALUES ('39', 'area', '010', '38');
-INSERT INTO `ams_api_header` VALUES ('40', 'uid', '10001', '38');
-INSERT INTO `ams_api_header` VALUES ('45', 'area', '010', '21');
+INSERT INTO `ams_api_header` VALUES ('47', 'area', '010', '21');
 
 -- ----------------------------
 -- Table structure for ams_api_request_param
@@ -103,12 +99,10 @@ CREATE TABLE `ams_api_request_param` (
 -- ----------------------------
 -- Records of ams_api_request_param
 -- ----------------------------
-INSERT INTO `ams_api_request_param` VALUES ('29', 'a', '1', '0', '42', '0');
-INSERT INTO `ams_api_request_param` VALUES ('30', 'b', '2', '0', '42', '0');
-INSERT INTO `ams_api_request_param` VALUES ('34', 'a', '1', '0', '21', '0');
-INSERT INTO `ams_api_request_param` VALUES ('35', 'b', '2', '0', '21', '0');
 INSERT INTO `ams_api_request_param` VALUES ('36', 'a', '10', '0', '43', '0');
 INSERT INTO `ams_api_request_param` VALUES ('37', 'b', '8', '0', '43', '0');
+INSERT INTO `ams_api_request_param` VALUES ('40', 'a', '1', '0', '21', '0');
+INSERT INTO `ams_api_request_param` VALUES ('41', 'b', '2', '0', '21', '0');
 
 -- ----------------------------
 -- Table structure for ams_api_result_param
@@ -187,6 +181,7 @@ CREATE TABLE `ams_test_case` (
 -- ----------------------------
 INSERT INTO `ams_test_case` VALUES ('8', '1', '单接口测试-加法', null, null, null, '2018-03-22 16:13:37', '3', '0', null);
 INSERT INTO `ams_test_case` VALUES ('9', '1', '单接口测试-减法', null, null, null, '2018-03-28 11:19:58', '3', '0', null);
+INSERT INTO `ams_test_case` VALUES ('10', '1', '关联测试', null, null, null, '2018-03-29 11:07:58', '3', '0', null);
 
 -- ----------------------------
 -- Table structure for ams_test_case_group
@@ -202,7 +197,6 @@ CREATE TABLE `ams_test_case_group` (
 -- ----------------------------
 -- Records of ams_test_case_group
 -- ----------------------------
-INSERT INTO `ams_test_case_group` VALUES ('1', '范德萨', '2');
 INSERT INTO `ams_test_case_group` VALUES ('2', '登录模块', '2');
 INSERT INTO `ams_test_case_group` VALUES ('3', '加减乘除测试', '1');
 
@@ -228,8 +222,10 @@ CREATE TABLE `ams_test_case_item` (
 -- ----------------------------
 -- Records of ams_test_case_item
 -- ----------------------------
-INSERT INTO `ams_test_case_item` VALUES ('8', '8', '{\"headers\": [{\"headerName\": \"area\", \"headerValue\": \"010\"}], \"apiUri\": \"localhost:8000/test/add?a=1&b=2\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"GET\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"1\"}, {\"paramName\": \"b\", \"paramValue\": \"2\"}]}', null, '200', '3', '[{\"paramKey\":\"sum\",\"matchRule\":1,\"paramInfo\":\"3\"},{\"paramKey\":\"a\",\"matchRule\":0,\"paramInfo\":\"1\"},{\"paramKey\":\"bb\",\"matchRule\":0,\"paramInfo\":\"2\"}]', '两个数相加', 'localhost:8000/test/add?a=1&b=2', 'GET', 'HTTP');
+INSERT INTO `ams_test_case_item` VALUES ('8', '8', '{\"headers\": [{\"headerName\": \"area\", \"headerValue\": \"010\"}], \"apiUri\": \"localhost:8000/test/add/\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"GET\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"1\"}, {\"paramName\": \"b\", \"paramValue\": \"2\"}]}', null, '200', '3', '[{\"paramKey\":\"sum\",\"matchRule\":1,\"paramInfo\":\"3\"},{\"paramKey\":\"a\",\"matchRule\":0,\"paramInfo\":\"1\"},{\"paramKey\":\"bb\",\"matchRule\":0,\"paramInfo\":\"2\"}]', '两个数相加', 'localhost:8000/test/add/', 'GET', 'HTTP');
 INSERT INTO `ams_test_case_item` VALUES ('11', '9', '{\"headers\": [], \"apiUri\": \"localhost:8000/test/sub\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"POST\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"10\"}, {\"paramName\": \"b\", \"paramValue\": \"8\"}]}', null, '200', '1', '2', '两个数相减', 'localhost:8000/test/sub', 'POST', 'HTTP');
+INSERT INTO `ams_test_case_item` VALUES ('12', '10', '{\"headers\": [{\"headerName\": \"area\", \"headerValue\": \"010\"}], \"apiUri\": \"localhost:8000/test/add/\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"GET\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"1\"}, {\"paramName\": \"b\", \"paramValue\": \"2\"}]}', null, '200', '3', '[{\"paramKey\":\"sum\",\"matchRule\":1,\"paramInfo\":\"3\"}]', '两个数相加', 'localhost:8000/test/add/', 'GET', 'HTTP');
+INSERT INTO `ams_test_case_item` VALUES ('13', '10', '{\"headers\": [], \"apiUri\": \"localhost:8000/test/sub/\", \"apiProtocol\": \"HTTP\", \"apiMethod\": \"POST\", \"requestType\": \"formData\", \"params\": [{\"paramName\": \"a\", \"paramValue\": \"<response[0].sum>\"}, {\"paramName\": \"b\", \"paramValue\": \"8\"}, {\"paramName\": \"fdsa\", \"paramValue\": \"fdsa\"}]}', null, '200', '1', '-5', '两个数相减', 'localhost:8000/test/sub/', 'POST', 'HTTP');
 
 -- ----------------------------
 -- Table structure for ams_test_case_item_result
