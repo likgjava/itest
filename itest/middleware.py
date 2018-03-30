@@ -13,11 +13,6 @@ class ExteriorAuthMiddleware(MiddlewareMixin):
     def process_request(self, request):
         log.info('*' * 100)
         log.info('ExteriorAuthMiddleware request.path={}'.format(request.path))
-        if request.method == 'GET':
-            requestData = request.GET
-        else:
-            requestData = request.POST
-        request.session['errmsg'] = ''
 
         # 退出
         if request.path in ['/logout/']:
@@ -26,7 +21,7 @@ class ExteriorAuthMiddleware(MiddlewareMixin):
         # 未登录
         elif not request.session.has_key('user'):
             # 测试接口
-            if request.path.startswith('/test/'):
+            if request.path.startswith('/test/') or request.path.startswith('/mock/'):
                 print('这是测试接口........')
                 pass
             # 转到登录界面

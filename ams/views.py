@@ -101,22 +101,26 @@ def project_list(request):
 
 def project_info(request):
     pid = request.GET.get('pid', None)
-    if pid:
-        plist = Project.objects.all()
-        data = {'project_list': plist}
+    try:
+        if pid:
+            plist = Project.objects.all()
+            data = {'project_list': plist}
 
-        project = Project.objects.get(id=pid)
-        data['project'] = project
+            project = Project.objects.get(id=pid)
+            data['project'] = project
 
-        # 获取接口和用例总数
-        data['api_count'] = Api.objects.filter(project=project).count()
-        data['case_count'] = Test_case.objects.filter(project=project).count()
+            # 获取接口和用例总数
+            data['api_count'] = Api.objects.filter(project=project).count()
+            data['case_count'] = Test_case.objects.filter(project=project).count()
 
-        # 保存到session中
-        request.session['pid'] = pid
-        request.session['pname'] = project.projectName
-        return render(request, 'project_info.html', data)
-    else:
+            # 保存到session中
+            request.session['pid'] = pid
+            request.session['pname'] = project.projectName
+            return render(request, 'project_info.html', data)
+        else:
+            return HttpResponseRedirect('/project_list/')
+    except Exception as e:
+        log.error('project_info error. {}'.format(e))
         return HttpResponseRedirect('/project_list/')
 
 
