@@ -439,9 +439,9 @@ def send_request(request):
         elif method == 'POST':
             if request_type == 'formData':
                 params = json.loads(params_str)
-                r = requests.post(url, params=params, headers=headers)
+                r = requests.post(url, params=params, headers=headers, verify=False)
             else:
-                r = requests.post(url, data=params_str, headers=headers)
+                r = requests.post(url, data=params_str, headers=headers, verify=False)
 
         print('status============', r.status_code)
         result['httpCode'] = r.status_code
