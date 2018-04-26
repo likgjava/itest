@@ -25,6 +25,7 @@
 <body>
 <div class="container">
     <form class="form-signin" id="loginForm" action="/login/">
+        {% csrf_token %}
         <h2 class="form-signin-heading">iTest接口管理系统</h2>
         <div class="form-group">
             <label for="userName" class="sr-only">用户名</label>
