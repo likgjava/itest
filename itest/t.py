@@ -3,6 +3,14 @@ import re
 
 import sys
 
+
+list = []
+s = '数学&英语'
+print(s.split('&'))
+list.append(s.split('&'))
+print('list=', list)
+print(re.split(r'[&,]', s))
+
 a = 'hello' in ['hello3', 'hello2']
 print(a)
 
