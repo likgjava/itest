@@ -4,11 +4,11 @@ import re
 import sys
 
 
-list = []
+list2 = []
 s = '数学&英语'
 print(s.split('&'))
-list.append(s.split('&'))
-print('list=', list)
+list2.append(s.split('&'))
+print('list=', list2)
 print(re.split(r'[&,]', s))
 
 a = 'hello' in ['hello3', 'hello2']
